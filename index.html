@@ -4,23 +4,19 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#1d4ed8" />
-<title>AI 主课知识宝典 · 昨日课堂复习</title>
+<title>AI 主课知识宝典 · 每日复习</title>
 <style>
-:root{
-  --bg:#f4f6fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;
-  --primary:#2563eb;--primary-soft:#dbeafe;--ok:#16a34a;--ok-soft:#dcfce7;
-  --bad:#dc2626;--bad-soft:#fee2e2;--warn:#d97706;--warn-soft:#fef3c7;
-  --shadow:0 8px 24px rgba(15,23,42,.08);--radius:16px;--nav-h:64px;
-  --safe-b:env(safe-area-inset-bottom,0px);--font:16px;
-}
+:root{--bg:#f4f6fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e2e8f0;--primary:#2563eb;--primary-soft:#dbeafe;--ok:#16a34a;--ok-soft:#dcfce7;--bad:#dc2626;--bad-soft:#fee2e2;--warn:#d97706;--warn-soft:#fef3c7;--shadow:0 8px 24px rgba(15,23,42,.08);--radius:16px;--nav-h:64px;--safe-b:env(safe-area-inset-bottom,0px);--font:16px}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;font-size:var(--font);line-height:1.55}
-button,input{font:inherit}
+button,input,select{font:inherit}
 body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
 .app{min-height:100vh;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 12px)}
 .top{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,#1d4ed8,#2563eb);color:#fff;padding:14px 16px 16px;box-shadow:0 6px 18px rgba(37,99,235,.25)}
 .top h1{margin:0;font-size:18px;font-weight:700}
 .top p{margin:4px 0 0;opacity:.9;font-size:12px}
+.course-select{margin-top:10px;display:flex;gap:8px;align-items:center}
+.course-select select{flex:1;border:none;border-radius:10px;padding:10px 12px;background:rgba(255,255,255,.95);color:#0f172a;min-height:42px}
 .progress-row{display:flex;align-items:center;gap:12px;margin-top:12px}
 .ring{width:54px;height:54px;border-radius:50%;background:conic-gradient(#fff var(--p,0%), rgba(255,255,255,.25) 0);display:grid;place-items:center;flex-shrink:0}
 .ring-inner{width:42px;height:42px;border-radius:50%;background:#1d4ed8;display:grid;place-items:center;font-size:11px;font-weight:700}
@@ -39,14 +35,13 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
 .btn.ghost{background:#fff;color:var(--primary);border:1px solid #bfdbfe}
 .btn.soft{background:var(--primary-soft);color:#1d4ed8}
 .btn.block{width:100%}
-.btn.ok{background:var(--ok)}
-.btn.warn{background:var(--warn)}
 .btn.bad{background:var(--bad)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:600}
 .chip.orange{background:var(--warn-soft);color:#92400e}
 .chip.green{background:var(--ok-soft);color:#166534}
 .chip.gray{background:#f1f5f9;color:#475569}
+.chip.blue{background:var(--primary-soft);color:#1d4ed8}
 .mod{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
 .mod .dot{width:12px;height:12px;border-radius:50%;margin-top:5px;flex-shrink:0}
 .mod .meta{flex:1}
@@ -93,27 +88,37 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
 .hidden{display:none!important}
 .back-btn{background:transparent;border:none;color:#1d4ed8;font-weight:700;padding:0 0 10px;cursor:pointer}
 .result-big{font-size:28px;font-weight:800;text-align:center;margin:8px 0}
+.day-card{cursor:pointer;border:1.5px solid var(--line);transition:border-color .15s}
+.day-card.active-day{border-color:#93c5fd;background:linear-gradient(180deg,#eff6ff,#fff)}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top">
     <h1>AI 主课知识宝典</h1>
-    <p>昨日课堂复习 · 先懂原理，再选工具</p>
+    <p id="topSub">每日课堂复习 · 学练回看</p>
+    <div class="course-select">
+      <select id="courseSelect" aria-label="选择课程日"></select>
+    </div>
     <div class="progress-row">
       <div class="ring" id="homeRing" style="--p:0%"><div class="ring-inner" id="homeRingText">0%</div></div>
       <div class="stats">
-        <div class="stat"><b id="statLearned">0/6</b><span>已学模块</span></div>
+        <div class="stat"><b id="statLearned">0/0</b><span>已学模块</span></div>
         <div class="stat"><b id="statAcc">-</b><span>正确率</span></div>
         <div class="stat"><b id="statWrong">0</b><span>错题</span></div>
       </div>
     </div>
   </header>
 
-  <!-- 首页 -->
   <section class="page active" id="page-home">
     <div class="card">
-      <div class="kicker">今日任务</div>
+      <div class="kicker">当前课程</div>
+      <h3 id="homeCourseTitle">-</h3>
+      <p class="muted" id="homeCourseSummary"></p>
+      <div class="tag-row" id="homeGoals"></div>
+    </div>
+    <div class="card">
+      <div class="kicker">今日任务（针对当前课程日）</div>
       <div class="goal"><div class="check" id="taskLearn"></div><div><b>学完 1 个模块</b><div class="muted small">系统复习一个知识点</div></div></div>
       <div class="goal"><div class="check" id="taskQuiz"></div><div><b>完成 8 道练习</b><div class="muted small" id="taskQuizText">已练 0 / 8</div></div></div>
       <div class="goal"><div class="check" id="taskReview"></div><div><b>回看错题一次</b><div class="muted small">答错后温习课堂片段</div></div></div>
@@ -126,8 +131,12 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
       <button class="btn ghost block" style="margin-top:8px" id="btnOpenWrong">查看错题本</button>
     </div>
     <div class="card">
+      <h3>全部课程进度</h3>
+      <div id="allDaysProgress"></div>
+    </div>
+    <div class="card">
       <h3>课堂金句</h3>
-      <div class="quote" id="homeQuote">先懂原理，再选工具。</div>
+      <div class="quote" id="homeQuote">-</div>
       <button class="btn ghost block" id="btnNextQuote">换一句</button>
     </div>
     <div class="card">
@@ -136,20 +145,19 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
     </div>
   </section>
 
-  <!-- 学 -->
   <section class="page" id="page-learn">
     <div id="learnList"></div>
     <div id="learnDetail" class="hidden"></div>
   </section>
 
-  <!-- 练 -->
   <section class="page" id="page-quiz">
     <div id="quizSetup">
       <div class="card">
         <h3>选择练习模式</h3>
+        <p class="muted small" id="quizCourseHint"></p>
         <div class="seg" id="quizModeSeg">
           <button data-mode="module" class="active">模块测</button>
-          <button data-mode="mix">综合 12 题</button>
+          <button data-mode="mix">综合练</button>
           <button data-mode="wrong">错题重练</button>
         </div>
         <div id="modulePick"></div>
@@ -160,19 +168,17 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
     <div id="quizResult" class="hidden"></div>
   </section>
 
-  <!-- 回看 -->
   <section class="page" id="page-review">
     <div class="card">
       <h3>错题本</h3>
-      <p class="muted small">答错的题会自动收集。连续答对 2 次可标记掌握并移出。</p>
+      <p class="muted small">按当前课程日过滤。连续答对 2 次可移出。</p>
       <div id="wrongList"></div>
     </div>
   </section>
 
-  <!-- 我的 -->
   <section class="page" id="page-me">
     <div class="card">
-      <h3>学习数据</h3>
+      <h3>学习数据（当前日）</h3>
       <div id="meStats" class="muted"></div>
     </div>
     <div class="card">
@@ -180,18 +186,23 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
       <div id="meModules"></div>
     </div>
     <div class="card">
+      <h3>全部课程总览</h3>
+      <div id="meAllDays"></div>
+    </div>
+    <div class="card">
       <h3>设置</h3>
       <div class="row" style="margin-bottom:8px">
         <button class="btn soft" id="btnFontNormal">标准字</button>
         <button class="btn soft" id="btnFontLarge">大字号</button>
       </div>
-      <button class="btn ghost block" id="btnCopyShare">复制分享文案</button>
-      <button class="btn bad block" style="margin-top:8px" id="btnReset">重置全部进度</button>
+      <button class="btn ghost block" id="btnCopyShare">复制分享链接</button>
+      <button class="btn bad block" style="margin-top:8px" id="btnResetDay">重置当前日进度</button>
+      <button class="btn ghost block" style="margin-top:8px" id="btnResetAll">重置全部进度</button>
     </div>
     <div class="card">
-      <h3>关于本课</h3>
-      <p class="muted small">基于 2026-07-15 飞书会议授课内容整理。教案正文采用更严谨表述，并保留课堂原话对照，便于你回忆当时场景。</p>
-      <p class="muted small">来源妙记：obcntzsiesl67451ophasjx2</p>
+      <h3>关于</h3>
+      <p class="muted small">支持每日新增课程。顶部切换 Day1 / Day2 … 查看对应教案与习题。进度保存在本机浏览器。</p>
+      <p class="muted small" id="aboutVersion"></p>
     </div>
   </section>
 </div>
@@ -203,356 +214,313 @@ body{max-width:480px;margin:0 auto;min-height:100vh;position:relative}
   <button data-tab="review"><span class="ico">🔁</span>回看</button>
   <button data-tab="me"><span class="ico">👤</span>我的</button>
 </nav>
-
-<div class="sheet-mask" id="sheetMask">
-  <div class="sheet" id="sheetBody"></div>
-</div>
+<div class="sheet-mask" id="sheetMask"><div class="sheet" id="sheetBody"></div></div>
 <div class="toast" id="toast"></div>
-
 <script>
-/* =========================
-   DATA — 知识 + 题库
-   ========================= */
-const DATA = {
-  meta: {
-    title: "AI 主课知识宝典",
-    subtitle: "昨日课堂复习",
-    sourceMinutes: "obcntzsiesl67451ophasjx2",
-    sourceDate: "2026-07-15",
-    version: "1.0.0"
-  },
-  modules: [
-    {id:"M1",title:"应用与模型",order:1,timeRange:"01:30–06:30",chapterRef:"纪要·章节2",summary:"豆包、Kimi 等是应用；背后是模型。通用大模型通识接近，差异在数据偏好与能力形态。",goals:["能区分应用层与模型层","理解通用大模型与“偏科”","通识问题不必迷信品牌"],color:"#3B82F6"},
-    {id:"M2",title:"联网与多模态",order:2,timeRange:"09:00–13:30",chapterRef:"纪要·章节4",summary:"模型本体通常不实时联网，靠外挂搜索；多模态可处理图/音/视频/文档。按任务选型。",goals:["理解“能查今天新闻”的原理","区分文本模型与多模态","会按任务选模型能力"],color:"#06B6D4"},
-    {id:"M3",title:"幻觉与边界",order:3,timeRange:"13:30–16:00 / 37:00–40:30",chapterRef:"纪要·章节5+7",summary:"先学 AI 不会什么。幻觉、遗忘、瞎编多来自信息不足、冲突、窗口顶掉或检索打架。",goals:["会用课堂三分法理解边界","知道幻觉常见成因","掌握防幻觉基本动作"],color:"#F59E0B"},
-    {id:"M4",title:"以词猜词",order:4,timeRange:"16:00–26:00",chapterRef:"纪要·章节6",summary:"大模型本质是下一词概率预测。前提越多，候选越少；给足信息是用好 AI 的第一原则。",goals:["理解“猜词”工作隐喻","知道为何描述越具体越准","会写更完整的提示信息"],color:"#8B5CF6"},
-    {id:"M5",title:"上下文与 Token",order:5,timeRange:"26:00–47:00",chapterRef:"纪要·章节7",summary:"同会话有短期记忆；新会话清零；窗口有上限会顶掉旧内容。Token 是计量单位。",goals:["理解短期记忆=会话上下文","会判断何时新开窗口","理解 Token 是计量而非“魔法”"],color:"#22C55E"},
-    {id:"M6",title:"Skill / Agent / WorkBuddy",order:6,timeRange:"48:00–01:19",chapterRef:"纪要·章节8–9",summary:"Skill 是技能+记忆外挂；Agent 给模型装手脚；WorkBuddy 是工具层，背后仍调具体模型。",goals:["说清 Skill 与提示词关系","区分聊天工具与 Agent","会做办公场景务实选型"],color:"#EF4444"}
-  ],
-  cards: [
-    {id:"C-M1-01",moduleId:"M1",type:"concept",title:"应用层 vs 模型层",body:"你平时打开的豆包、Kimi、ChatGPT App，首先是「应用/产品」。它们背后调用一个（或多个）大模型来理解与生成。同一应用也可能切换不同模型；同一模型也可被多个应用调用。",classroomQuote:"这些什么豆包啦、Kimi 啦，这些都是应用，它背后都有个模型。",rigorousNote:"课堂用「APP=应用、背后=模型」帮助入门。更严谨地说：产品层还包含账号、插件、搜索、UI 等，模型只是核心推理引擎之一。",tags:["应用","模型"],anchorIds:["A-M1-01"]},
-    {id:"C-M1-02",moduleId:"M1",type:"concept",title:"通用大模型与偏科",body:"通用大模型在通识问答上通常都够用。真正的差别往往在：训练数据偏好、是否多模态、上下文长度、工具能力、对齐风格。可把它们理解成“都能教书，但有人更擅长数学、有人更擅长文本”。",classroomQuote:"它们本质上都是通用大模型……区别就是开发模型这个人的偏好不一样。",rigorousNote:"「本质上没区别」是口语强调“同属通用模型”。实际产品差异明显，选型要看任务，不是看品牌口号。",tags:["通用大模型","偏科"],anchorIds:["A-M1-02"]},
-    {id:"C-M1-03",moduleId:"M1",type:"method",title:"通识问题怎么选模型",body:"洗衣机区别、太阳系常识这类通识问题，多数主流模型都能答。不必为通识题纠结品牌；把精力留给：要不要读图、要不要长上下文、要不要写代码/做表。",classroomQuote:"像这种人类共知的问题，不用分模型细分……基本上都不会错。",rigorousNote:"仍建议对关键事实做交叉核实。模型有训练截止与幻觉，不是百科全书。",tags:["选型"],anchorIds:["A-M1-02"]},
-    {id:"C-M2-01",moduleId:"M2",type:"concept",title:"联网不是模型“自带大脑实时更新”",body:"模型权重里的知识有训练截止。能回答“今天发生了什么”，通常是系统外挂了搜索/浏览器：先检索网页，再把结果喂回模型综合回答。",classroomQuote:"给它外头又加了个浏览器……它是加了层浏览器。",rigorousNote:"课堂说“Kimi 是唯一能搜索联网的”属于当时口语举例，现已过时。多数产品都可挂联网/搜索工具。",tags:["联网","工具"],anchorIds:["A-M2-01"]},
-    {id:"C-M2-02",moduleId:"M2",type:"concept",title:"多模态：不止会聊天",body:"文本模型主要处理文字。多模态模型可同时理解图片、音频、视频、PDF/Word 等。选型看任务：要读图/截图做表，优先多模态；纯长文分析可看文本强模型。",classroomQuote:"DeepSeek……不是多模态大模型……它只能对话；豆包是。",rigorousNote:"产品能力会升级。学习时记住判断标准：看该模型/入口是否支持图像等多模态输入，不要把某品牌永久钉死。",tags:["多模态"],anchorIds:["A-M2-02"]},
-    {id:"C-M2-03",moduleId:"M2",type:"method",title:"办公选型小表",body:"读图/截图→多模态；很长材料比对→更长上下文；做表排版→Agent+办公 Skill；随便问问通识→任意主流模型。先定任务，再选能力。",classroomQuote:"有的工具适合开发，有的工具适合给你整理文本。",rigorousNote:"这是课堂延伸的实用框架，帮助把“原理”落到日常选择。",tags:["选型"],anchorIds:["A-M2-02"]},
-    {id:"C-M3-01",moduleId:"M3",type:"boundary",title:"先学它不会什么",body:"学 AI 不要只追“它会啥”，更要知道边界。课堂用三分法帮助记忆：幻觉（记错/说错）、遗忘（前文丢了）、瞎编（信息不足硬编）。",classroomQuote:"你不要学习它会啥，你要学习它不会啥……才知道边界。",rigorousNote:"学术上常把多种事实性错误统称 hallucination。课堂三分法是教学脚手架，便于定位原因并改提示。",tags:["边界"],anchorIds:["A-M3-01"]},
-    {id:"C-M3-02",moduleId:"M3",type:"boundary",title:"幻觉从哪来",body:"常见成因：你说得太模糊；同一会话塞了不相关话题；上下文窗口顶掉旧信息；搜索结果与你给的信息冲突。模型在“打架信息”里可能选错路径。",classroomQuote:"他脑子里信息打架……所以幻觉就是这么来的。",rigorousNote:"也有模型自身统计偏差。实践上：给足定义、拆分话题、要求引用依据、人工核关键结论。",tags:["幻觉"],anchorIds:["A-M3-02"]},
-    {id:"C-M3-03",moduleId:"M3",type:"method",title:"防幻觉三动作",body:"① 把目标、格式、约束说清楚；② 相关话题续聊，不相关就新开窗口；③ 对金额、人名、政策等关键事实二次核实。把 AI 当会干活的同事，而不是绝对权威。",classroomQuote:"你需要审视的去看这件事。",rigorousNote:"延伸：可要求模型先列不确定点，或给出“需要我补充的信息”。",tags:["方法"],anchorIds:["A-M3-02"]},
-    {id:"C-M4-01",moduleId:"M4",type:"concept",title:"以词猜词：工作原理隐喻",body:"大模型生成时，一步步预测下一个最可能的词/片段。你给的前文越具体，可走的路径越窄，输出越可控。它不是“灵魂理解”，而是超强统计补全。",classroomQuote:"它本质上就是一个以词猜词游戏。",rigorousNote:"这是有效教学隐喻。更严谨：基于大规模语料与对齐训练的序列建模/表征学习，不只是简单接龙。",tags:["原理"],anchorIds:["A-M4-01"]},
-    {id:"C-M4-02",moduleId:"M4",type:"method",title:"描述越具体，回答越准",body:"“帮我做表格”太空；“把以下数据做成三列表格，表头为…，金额求和，导出 WPS”更清晰。信息越充分，模型越容易猜中你要的结果。",classroomQuote:"你描述得越具体，它给你回答得就越准确。",rigorousNote:"课堂原话是应用层正确理解；原理层是：更多约束 → 缩小概率空间。",tags:["提示词"],anchorIds:["A-M4-02"]},
-    {id:"C-M4-03",moduleId:"M4",type:"method",title:"提示词三要素（延伸）",body:"写提示时可记三块：① 角色/背景 ② 任务目标 ③ 约束与输出格式。不会写专业词时，可挂 Skill 补齐“行话”。",classroomQuote:"如果想让大模型遵从你的意愿……你得把提示词写好。",rigorousNote:"这是基于课堂“写好提示词/挂 Skill”延伸的可操作框架。",tags:["提示词","延伸"],anchorIds:["A-M4-02"]},
-    {id:"C-M5-01",moduleId:"M5",type:"concept",title:"短期记忆 = 当前会话上下文",body:"同一聊天窗口里，模型通常能利用前文（短期记忆）。点“新建会话”后，旧对话默认不再带入。所以：相关话题可续聊；全新任务建议新开。",classroomQuote:"以一个会话为单元的记忆叫短期记忆……新对话就没有记忆了。",rigorousNote:"部分产品另有“长期记忆/个人资料”功能，与会话上下文不同，课堂主讲的是会话级短期记忆。",tags:["记忆","上下文"],anchorIds:["A-M5-01"]},
-    {id:"C-M5-02",moduleId:"M5",type:"boundary",title:"窗口有上限，会顶掉旧内容",body:"上下文不是无限。聊太长时，最早内容可能被挤出窗口，表现为“它忘了”。不相关信息混在一个窗口，更容易乱、更容易幻觉。",classroomQuote:"当你聊到临界点……它就会顶掉最上头的那个内容。",rigorousNote:"不同模型上下文长度不同，且产品参数会变。学习重点是“有上限会顶掉”，不必背死数字。",tags:["窗口"],anchorIds:["A-M5-02"]},
-    {id:"C-M5-03",moduleId:"M5",type:"concept",title:"Token 是计量单位",body:"Token 用来计量模型输入/输出的大致长度，类似“字数账单”。充值/算力常按 Token 计。中文可粗略记“大约一字一 Token”，但只是记忆法。",classroomQuote:"一个汉字等于一个 token，大概……它就等于一个token。",rigorousNote:"实际随分词器变化，常见约为 1～1.5+ token/字，标点与英文规则也不同。别当精确换算。",tags:["Token"],anchorIds:["A-M5-03"]},
-    {id:"C-M5-04",moduleId:"M5",type:"concept",title:"图片如何进上下文",body:"模型并不是把整张 10MB 原图原封不动塞进上下文，而是把图像编码成它能处理的表示后再推理。所以“图片很大≠一定撑爆上下文”不能简单等价。",classroomQuote:"它只是把图片转化成……一堆数字，给到了通用大模型的脑子里。",rigorousNote:"编码后仍占上下文与算力；超长图文仍可能受限。课堂重点是破除“原图像素数=上下文占用”的误解。",tags:["多模态","Token"],anchorIds:["A-M5-03"]},
-    {id:"C-M6-01",moduleId:"M6",type:"concept",title:"Skill = 打包的专业提示词/规范",body:"Skill（技能）可理解为别人整理好的行业提示词与操作规范包。挂上后，你可以说得更少、更口语，模型仍按专业流程做事。它既是技能外挂，也可沉淀业务记忆。",classroomQuote:"Skills，我们中文叫它提示词手册，或者叫规范手册……本质上还是一堆提示词。",rigorousNote:"不同平台 Skill 实现不同，可能含脚本/工具调用，不只是纯文本提示。课堂简化为“提示词包”便于入门。",tags:["Skill"],anchorIds:["A-M6-01"]},
-    {id:"C-M6-02",moduleId:"M6",type:"demo",title:"为什么挂了 Skill 就能少说话",body:"你不会说“行距/透视/LOOKUP”，Skill 里已经写好专业说法与步骤。于是“把这张图变成 WPS 表格并放到桌面”也能跑通。没有 Skill 时，你就要自己把细节说全。",classroomQuote:"有 skill 你就少说点……skill 就是让你的提示词说的少了一点。",rigorousNote:"Skill 降低表达门槛，但不取消验收：结果仍需你检查。",tags:["Skill","演示"],anchorIds:["A-M6-02"]},
-    {id:"C-M6-03",moduleId:"M6",type:"concept",title:"Agent：给模型装上手脚",body:"纯聊天只能“说”。Agent 在通用模型之上连接浏览器、电脑操作、文档/IM/外卖等工具，使它能执行任务。WorkBuddy 是 Agent/应用层；背后仍要调用具体大模型。",classroomQuote:"不是通用大模型，它是通用大模型给它加了手和脚了。",rigorousNote:"执行类能力涉及权限与合规：只能操作你授权的账号与范围，不要理解为可随意监控他人。",tags:["Agent"],anchorIds:["A-M6-03"]},
-    {id:"C-M6-04",moduleId:"M6",type:"method",title:"计划模式与务实选型",body:"复杂任务建议开计划模式：先澄清、先方案、你确认后再执行。办公整理/做表：工具层用 WorkBuddy 一类 Agent，模型可先用够用且成本可控的选择；Skill 解决“会不会说行话”。",classroomQuote:"处理复杂的任务……把计划模式打开……先帮你做个计划，当你觉得没问题了，他才去执行。",rigorousNote:"费用主要在模型 Token/会员；Skill 是否免费因平台而异，不宜绝对说“全都免费”。",tags:["计划模式","选型"],anchorIds:["A-M6-04"]},
-    {id:"C-M6-05",moduleId:"M6",type:"method",title:"像领导验收的工作法",body:"把 AI 当下属：先下达清晰任务 → 看结果 → 不满意就在同一上下文继续改。可并行多个任务窗口，人只做验收。AI 变强时，人更应把精力放在提要求与把关。",classroomQuote:"你就像个领导一样……一遍不行两遍……我只需要验收就好。",rigorousNote:"这是课堂收尾的工作流心法，和原理课闭环：给足信息 + 多轮约束 + 人工终审。",tags:["工作法"],anchorIds:["A-M6-04"]}
-  ],
-  quotes: [
-    {id:"Q-01",moduleId:"M1",text:"先懂原理，再选工具。",source:"课堂提炼",anchorId:"A-M1-01"},
-    {id:"Q-02",moduleId:"M1",text:"通识问题不必迷信品牌，先看任务要什么能力。",source:"课堂提炼",anchorId:"A-M1-02"},
-    {id:"Q-03",moduleId:"M2",text:"不是模型自己上网，是给它装了浏览器。",source:"课堂原意",anchorId:"A-M2-01"},
-    {id:"Q-04",moduleId:"M2",text:"按任务选型：读图看多模态，长文看上下文，执行看 Agent。",source:"延伸",anchorId:"A-M2-02"},
-    {id:"Q-05",moduleId:"M3",text:"不要只追 AI 会什么，更要理解边界。",source:"课堂原意",anchorId:"A-M3-01"},
-    {id:"Q-06",moduleId:"M3",text:"信息打架，就容易幻觉。",source:"课堂原意",anchorId:"A-M3-02"},
-    {id:"Q-07",moduleId:"M4",text:"它是猜的，但数据太大了，大概率猜得准。",source:"课堂原意",anchorId:"A-M4-01"},
-    {id:"Q-08",moduleId:"M4",text:"你给的条件越多，它乱猜的空间越小。",source:"课堂提炼",anchorId:"A-M4-02"},
-    {id:"Q-09",moduleId:"M5",text:"短期记忆靠会话，长期稳定靠 Skill。",source:"课堂提炼",anchorId:"A-M5-01"},
-    {id:"Q-10",moduleId:"M5",text:"窗口满了，会把最早的话顶掉。",source:"课堂原意",anchorId:"A-M5-02"},
-    {id:"Q-11",moduleId:"M6",text:"Skill 降低表达门槛，Agent 扩展执行边界。",source:"课堂提炼",anchorId:"A-M6-01"},
-    {id:"Q-12",moduleId:"M6",text:"WorkBuddy 是工具，背后还要接大模型这颗“脑子”。",source:"课堂原意",anchorId:"A-M6-03"}
-  ],
-  anchors: [
-    {id:"A-M1-01",moduleId:"M1",label:"聊天工具与底层模型",timeCode:"00:01:34",chapter:"纪要·章节2",transcriptHint:"豆包啦、Kimi 啦，这些都是应用，它背后都有个模型。",cardIds:["C-M1-01"],quoteIds:["Q-01"]},
-    {id:"A-M1-02",moduleId:"M1",label:"通用大模型与偏科",timeCode:"00:02:39",chapter:"纪要·章节2",transcriptHint:"它们都统称为通用大模型……区别就是开发模型这个人的偏好不一样。",cardIds:["C-M1-02","C-M1-03"],quoteIds:["Q-02"]},
-    {id:"A-M2-01",moduleId:"M2",label:"搜索联网=外挂浏览器",timeCode:"00:09:30",chapter:"纪要·章节4",transcriptHint:"通用大模型是不能联网的……给它外头又加了个浏览器。",cardIds:["C-M2-01"],quoteIds:["Q-03"]},
-    {id:"A-M2-02",moduleId:"M2",label:"多模态与文本模型",timeCode:"00:11:57",chapter:"纪要·章节4",transcriptHint:"DeepSeek……不是多模态……豆包是……既可以看图，又能吃 PDF。",cardIds:["C-M2-02","C-M2-03"],quoteIds:["Q-04"]},
-    {id:"A-M3-01",moduleId:"M3",label:"先学边界：幻觉",timeCode:"00:14:00",chapter:"纪要·章节5",transcriptHint:"你不要学习它会啥，你要学习它不会啥……叫幻觉。",cardIds:["C-M3-01"],quoteIds:["Q-05"]},
-    {id:"A-M3-02",moduleId:"M3",label:"信息打架导致幻觉",timeCode:"00:37:28",chapter:"纪要·章节7延伸",transcriptHint:"他脑子里信息打架……所以幻觉就是这么来的。",cardIds:["C-M3-02","C-M3-03"],quoteIds:["Q-06"]},
-    {id:"A-M4-01",moduleId:"M4",label:"以词猜词",timeCode:"00:15:55",chapter:"纪要·章节6",transcriptHint:"它是猜的……本质上就是一个以词猜词游戏。",cardIds:["C-M4-01"],quoteIds:["Q-07"]},
-    {id:"A-M4-02",moduleId:"M4",label:"描述越具体越准",timeCode:"00:20:50",chapter:"纪要·章节6",transcriptHint:"描述得越具体，它给你回答得就越准确。",cardIds:["C-M4-02","C-M4-03"],quoteIds:["Q-08"]},
-    {id:"A-M5-01",moduleId:"M5",label:"短期记忆与新会话",timeCode:"00:30:36",chapter:"纪要·章节7",transcriptHint:"以一个会话为单元的记忆叫短期记忆……新对话就没有记忆了。",cardIds:["C-M5-01"],quoteIds:["Q-09"]},
-    {id:"A-M5-02",moduleId:"M5",label:"上下文顶掉",timeCode:"00:33:25",chapter:"纪要·章节7",transcriptHint:"它会顶掉最上头的那个内容……他老忘就是可能超了。",cardIds:["C-M5-02"],quoteIds:["Q-10"]},
-    {id:"A-M5-03",moduleId:"M5",label:"Token 与图片编码",timeCode:"00:44:36",chapter:"纪要·章节7",transcriptHint:"Token 是计量单位……一个汉字等于一个 token，大概。",cardIds:["C-M5-03","C-M5-04"],quoteIds:["Q-09"]},
-    {id:"A-M6-01",moduleId:"M6",label:"Skill 是什么",timeCode:"00:48:48",chapter:"纪要·章节8",transcriptHint:"Skills……提示词手册……本质上还是一堆提示词。",cardIds:["C-M6-01"],quoteIds:["Q-11"]},
-    {id:"A-M6-02",moduleId:"M6",label:"挂 Skill 少说话",timeCode:"01:00:03",chapter:"纪要·章节8",transcriptHint:"有了这个技能……我直接就一句话就可以了。",cardIds:["C-M6-02"],quoteIds:["Q-11"]},
-    {id:"A-M6-03",moduleId:"M6",label:"Agent 装手脚",timeCode:"01:09:33",chapter:"纪要·章节9",transcriptHint:"通用大模型给它加了手和脚了……安装了钉钉、电脑。",cardIds:["C-M6-03"],quoteIds:["Q-12"]},
-    {id:"A-M6-04",moduleId:"M6",label:"计划模式与验收",timeCode:"01:12:44",chapter:"纪要·章节9–10",transcriptHint:"计划模式就是在工作之前自己先计划一下……你只需要验收。",cardIds:["C-M6-04","C-M6-05"],quoteIds:["Q-12"]}
-  ],
-  questions: [
-    /* M1 5 */
-    {id:"QZ-M1-01",moduleId:"M1",type:"single",stem:"关于「豆包 / Kimi」与大模型的关系，下列哪项最准确？",options:[{key:"A",text:"它们本身就是模型，没有应用层"},{key:"B",text:"它们首先是应用/产品，背后再调用模型"},{key:"C",text:"它们只能搜索，不能生成"},{key:"D",text:"它们和模型是完全无关的两个行业"}],answer:"B",explain:"课堂强调：聊天产品是应用，背后有模型。",wrongHint:"回想“APP 是应用，背后才是模型”。",review:{cardIds:["C-M1-01"],quoteIds:["Q-01"],anchorIds:["A-M1-01"]},difficulty:1,tags:["应用","模型"]},
-    {id:"QZ-M1-02",moduleId:"M1",type:"single",stem:"“通用大模型通识接近，但仍可能偏科”意味着？",options:[{key:"A",text:"所有模型在一切任务上完全相同"},{key:"B",text:"通识问答通常都还行，细节能力与数据偏好有差异"},{key:"C",text:"只有一个品牌能回答通识问题"},{key:"D",text:"偏科等于完全不能用"}],answer:"B",explain:"同属通用模型不代表无差异；选型看任务与能力形态。",wrongHint:"“都能教书，但有人数学更好”的比喻。",review:{cardIds:["C-M1-02"],quoteIds:["Q-02"],anchorIds:["A-M1-02"]},difficulty:2,tags:["偏科"]},
-    {id:"QZ-M1-03",moduleId:"M1",type:"single",stem:"处理“滚筒洗衣机和波轮有什么区别”这类通识题，更合理的态度是？",options:[{key:"A",text:"必须换成最贵的国外模型才敢问"},{key:"B",text:"多数主流模型都可，重点是表达清楚并必要时核实"},{key:"C",text:"通识题只能问搜索引擎，不能问模型"},{key:"D",text:"必须先挂 Skill 才能问通识"}],answer:"B",explain:"课堂：通识不必过度迷信品牌；仍建议关键事实核实。",wrongHint:"通识题≠必须追最贵模型。",review:{cardIds:["C-M1-03"],quoteIds:["Q-02"],anchorIds:["A-M1-02"]},difficulty:1,tags:["选型"]},
-    {id:"QZ-M1-04",moduleId:"M1",type:"judge",stem:"判断：豆包 App 和它背后的豆包模型，是完全同一个概念，没有分层。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"App/产品与模型分层：应用可调用模型，二者不是同一层概念。",wrongHint:"应用层 ≠ 模型层。",review:{cardIds:["C-M1-01"],quoteIds:["Q-01"],anchorIds:["A-M1-01"]},difficulty:1,tags:["应用"]},
-    {id:"QZ-M1-05",moduleId:"M1",type:"judge",stem:"判断：说“各家通用大模型本质上完全没区别”，作为严谨结论是合适的。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"课堂口语在强调同属通用模型；严谨结论应承认数据、模态、上下文、工具等差异。",wrongHint:"看 rigorousNote：同属≠无差异。",review:{cardIds:["C-M1-02"],quoteIds:["Q-02"],anchorIds:["A-M1-02"]},difficulty:2,tags:["严谨"]},
-    /* M2 5 */
-    {id:"QZ-M2-01",moduleId:"M2",type:"single",stem:"模型“能聊今天的新闻”，更贴近哪种机制？",options:[{key:"A",text:"模型权重每天自动重训完成"},{key:"B",text:"外挂搜索/浏览工具检索后，再交给模型总结"},{key:"C",text:"模型天生实时连接所有网站数据库"},{key:"D",text:"只要参数够大就自动知道今天"}],answer:"B",explain:"课堂：给模型加浏览器/搜索，把检索结果喂回去。",wrongHint:"“加了层浏览器”。",review:{cardIds:["C-M2-01"],quoteIds:["Q-03"],anchorIds:["A-M2-01"]},difficulty:1,tags:["联网"]},
-    {id:"QZ-M2-02",moduleId:"M2",type:"single",stem:"如果你要把截图里的表格整理成 Excel，优先关注模型/工具的哪类能力？",options:[{key:"A",text:"是否多模态（能看图）+ 是否能落到表格文件"},{key:"B",text:"是否会讲笑话"},{key:"C",text:"是否必须不能联网"},{key:"D",text:"是否参数一定是某固定数字"}],answer:"A",explain:"读图需要多模态；落地表格常需 Agent/办公 Skill。",wrongHint:"截图→先看能不能“看见”图。",review:{cardIds:["C-M2-02","C-M2-03"],quoteIds:["Q-04"],anchorIds:["A-M2-02"]},difficulty:2,tags:["多模态"]},
-    {id:"QZ-M2-03",moduleId:"M2",type:"single",stem:"关于“某模型不能读图”，更稳妥的学习结论是？",options:[{key:"A",text:"该品牌永远不能读图"},{key:"B",text:"以当前入口是否支持多模态为准，能力会随版本变化"},{key:"C",text:"不能读图=完全没用"},{key:"D",text:"所有模型都能读图"}],answer:"B",explain:"课堂举例帮助理解文本 vs 多模态；产品会升级，记住判断标准即可。",wrongHint:"标准是“是否多模态”，别永久钉死品牌。",review:{cardIds:["C-M2-02"],quoteIds:["Q-04"],anchorIds:["A-M2-02"]},difficulty:2,tags:["严谨"]},
-    {id:"QZ-M2-04",moduleId:"M2",type:"judge",stem:"判断：模型本体的训练知识通常有截止时间，实时信息往往依赖工具检索。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"训练知识非实时；联网靠工具链。",wrongHint:"回想浏览器外挂。",review:{cardIds:["C-M2-01"],quoteIds:["Q-03"],anchorIds:["A-M2-01"]},difficulty:1,tags:["联网"]},
-    {id:"QZ-M2-05",moduleId:"M2",type:"judge",stem:"判断：今天仍然可以认为“只有 Kimi 能联网，其他都不能”。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"课堂原话是当时举例；现在多数产品可挂搜索，不能当永久事实。",wrongHint:"见课堂原话 vs 严谨标注。",review:{cardIds:["C-M2-01"],quoteIds:["Q-03"],anchorIds:["A-M2-01"]},difficulty:2,tags:["严谨"]},
-    /* M3 7 */
-    {id:"QZ-M3-01",moduleId:"M3",type:"single",stem:"课堂建议的 AI 学习顺序，更接近？",options:[{key:"A",text:"先背所有品牌广告语"},{key:"B",text:"先理解边界（不会什么），再知道能干什么"},{key:"C",text:"只学快捷键，不学原理"},{key:"D",text:"先充最贵会员再学习"}],answer:"B",explain:"“先学不会什么，才知道边界”。",wrongHint:"边界优先。",review:{cardIds:["C-M3-01"],quoteIds:["Q-05"],anchorIds:["A-M3-01"]},difficulty:1,tags:["方法"]},
-    {id:"QZ-M3-02",moduleId:"M3",type:"single",stem:"下列哪项最容易诱发“幻觉/胡说”？",options:[{key:"A",text:"目标清晰、材料充分、话题单一"},{key:"B",text:"表达模糊，且把无关话题塞进同一会话，或检索信息互相冲突"},{key:"C",text:"要求输出固定表格格式"},{key:"D",text:"新开一个干净会话处理新任务"}],answer:"B",explain:"模糊、混聊、信息打架是课堂强调的成因。",wrongHint:"信息打架。",review:{cardIds:["C-M3-02"],quoteIds:["Q-06"],anchorIds:["A-M3-02"]},difficulty:2,tags:["幻觉"]},
-    {id:"QZ-M3-03",moduleId:"M3",type:"single",stem:"把 AI 当“人/同事”来用，课堂想强调的是？",options:[{key:"A",text:"AI 有人类灵魂"},{key:"B",text:"沟通要给足信息，并对其结果保持审视"},{key:"C",text:"AI 永远正确"},{key:"D",text:"不要给 AI 任何背景"}],answer:"B",explain:"机制像协作沟通：信息不足会误解；关键结论要核。",wrongHint:"给信息 + 审视。",review:{cardIds:["C-M3-03"],quoteIds:["Q-05"],anchorIds:["A-M3-02"]},difficulty:1,tags:["方法"]},
-    {id:"QZ-M3-04",moduleId:"M3",type:"single",stem:"课堂“幻觉 / 遗忘 / 瞎编”三分法，主要用于？",options:[{key:"A",text:"替代所有学术定义"},{key:"B",text:"帮助定位问题并改进提问与会话管理"},{key:"C",text:"证明模型完全不可用"},{key:"D",text:"只用于写作文"}],answer:"B",explain:"教学脚手架：便于回忆场景并改行为。",wrongHint:"三分法是为了好用，不是学术终审。",review:{cardIds:["C-M3-01"],quoteIds:["Q-05"],anchorIds:["A-M3-01"]},difficulty:2,tags:["边界"]},
-    {id:"QZ-M3-05",moduleId:"M3",type:"judge",stem:"判断：只要模型足够强，用户就可以完全不提供背景信息。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"课堂反复强调：很多“模型不行”其实是信息不够。",wrongHint:"给足条件是第一原则。",review:{cardIds:["C-M3-02","C-M4-02"],quoteIds:["Q-08"],anchorIds:["A-M3-02"]},difficulty:1,tags:["信息"]},
-    {id:"QZ-M3-06",moduleId:"M3",type:"judge",stem:"判断：对话里你告诉模型 A 数据，网页检索却是 B 数据，模型有可能在冲突中答错。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"信息打架是幻觉来源之一。",wrongHint:"科悦装修金额冲突的例子。",review:{cardIds:["C-M3-02"],quoteIds:["Q-06"],anchorIds:["A-M3-02"]},difficulty:1,tags:["幻觉"]},
-    {id:"QZ-M3-07",moduleId:"M3",type:"judge",stem:"判断：对金额、人名、政策等关键事实，也应习惯二次核实。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"审视使用是防幻觉的基本功。",wrongHint:"把 AI 当同事不是当神。",review:{cardIds:["C-M3-03"],quoteIds:["Q-05"],anchorIds:["A-M3-02"]},difficulty:1,tags:["方法"]},
-    /* M4 7 */
-    {id:"QZ-M4-01",moduleId:"M4",type:"single",stem:"“以词猜词”主要想说明大模型在做什么？",options:[{key:"A",text:"像搜索引擎只返回网页链接"},{key:"B",text:"基于上下文逐步预测后续最可能的内容"},{key:"C",text:"每次都随机说一句无关的话"},{key:"D",text:"只复制训练语料原文绝不重组"}],answer:"B",explain:"下一词/片段的概率预测隐喻。",wrongHint:"接词游戏。",review:{cardIds:["C-M4-01"],quoteIds:["Q-07"],anchorIds:["A-M4-01"]},difficulty:1,tags:["原理"]},
-    {id:"QZ-M4-02",moduleId:"M4",type:"single",stem:"为什么“我今天吃了……”比单独一个“我”更容易被猜准后续？",options:[{key:"A",text:"因为字更少"},{key:"B",text:"因为约束更多，候选空间更小"},{key:"C",text:"因为模型会联网强制搜索菜单"},{key:"D",text:"因为中文不能单字预测"}],answer:"B",explain:"前提越多，可走路径越少。",wrongHint:"约束概率空间。",review:{cardIds:["C-M4-01","C-M4-02"],quoteIds:["Q-08"],anchorIds:["A-M4-01"]},difficulty:2,tags:["原理"]},
-    {id:"QZ-M4-03",moduleId:"M4",type:"single",stem:"下列哪条提示通常更好？",options:[{key:"A",text:"帮我弄一下"},{key:"B",text:"做个表"},{key:"C",text:"把以下 6 行销售数据整理为三列表格，表头为地区/品类/金额，按金额降序，输出可复制的 Markdown 表"},{key:"D",text:"你看着办，越快越好，别问我"}],answer:"C",explain:"目标、字段、规则、格式都给了。",wrongHint:"具体 > 模糊。",review:{cardIds:["C-M4-02","C-M4-03"],quoteIds:["Q-08"],anchorIds:["A-M4-02"]},difficulty:1,tags:["提示词"]},
-    {id:"QZ-M4-04",moduleId:"M4",type:"single",stem:"提示词三要素（延伸框架）更接近？",options:[{key:"A",text:"字体/字号/行距"},{key:"B",text:"角色背景 / 任务目标 / 约束与输出格式"},{key:"C",text:"价格/会员/积分"},{key:"D",text:"只有表情包"}],answer:"B",explain:"基于课堂“写好提示词”的可操作延伸。",wrongHint:"角色-任务-约束。",review:{cardIds:["C-M4-03"],quoteIds:["Q-08"],anchorIds:["A-M4-02"]},difficulty:2,tags:["延伸"]},
-    {id:"QZ-M4-05",moduleId:"M4",type:"judge",stem:"判断：很多时候觉得“模型不行”，其实是自己没给够条件。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"课堂经验法则：信息不足是常见原因。",wrongHint:"80% 体验问题来自信息不够（经验说法）。",review:{cardIds:["C-M4-02"],quoteIds:["Q-08"],anchorIds:["A-M4-02"]},difficulty:1,tags:["提示词"]},
-    {id:"QZ-M4-06",moduleId:"M4",type:"judge",stem:"判断：“模型是猜的”意味着它的回答永远没有参考价值。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"统计意义上大概率可用，但仍需约束与核实。",wrongHint:"猜得准 ≠ 无需核实，也 ≠ 毫无价值。",review:{cardIds:["C-M4-01"],quoteIds:["Q-07"],anchorIds:["A-M4-01"]},difficulty:2,tags:["原理"]},
-    {id:"QZ-M4-07",moduleId:"M4",type:"judge",stem:"判断：同样任务，补充示例、字段和验收标准，通常能提高可用性。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"更多有效约束 → 更可控输出。",wrongHint:"给足信息。",review:{cardIds:["C-M4-02"],quoteIds:["Q-08"],anchorIds:["A-M4-02"]},difficulty:1,tags:["提示词"]},
-    /* M5 7 */
-    {id:"QZ-M5-01",moduleId:"M5",type:"single",stem:"“短期记忆”在课堂语境里主要指？",options:[{key:"A",text:"模型出厂永久记住全世界每个人"},{key:"B",text:"当前会话窗口内的上下文"},{key:"C",text:"只有图片才有记忆"},{key:"D",text:"U 盘里的文件"}],answer:"B",explain:"以会话为单元的上下文记忆。",wrongHint:"新会话会清零。",review:{cardIds:["C-M5-01"],quoteIds:["Q-09"],anchorIds:["A-M5-01"]},difficulty:1,tags:["记忆"]},
-    {id:"QZ-M5-02",moduleId:"M5",type:"single",stem:"你刚在会话里说“我媳妇叫杨宁佳”，然后新建会话再问“我媳妇叫什么”，通常会？",options:[{key:"A",text:"一定还记得"},{key:"B",text:"默认不再带旧会话，往往答不出来（除非另有长期记忆功能）"},{key:"C",text:"自动去派出所查户口"},{key:"D",text:"只在夜间记得"}],answer:"B",explain:"新会话默认无旧上下文。",wrongHint:"新建会话=短期记忆清空。",review:{cardIds:["C-M5-01"],quoteIds:["Q-09"],anchorIds:["A-M5-01"]},difficulty:1,tags:["记忆"]},
-    {id:"QZ-M5-03",moduleId:"M5",type:"single",stem:"上下文“顶掉”最贴切的理解是？",options:[{key:"A",text:"模型把最早内容挤出有限窗口，表现为遗忘"},{key:"B",text:"手机内存物理爆炸"},{key:"C",text:"只有英文会顶掉"},{key:"D",text:"顶掉后永远不能再聊"}],answer:"A",explain:"窗口有上限，超了会丢最早内容。",wrongHint:"临界点顶掉最上头。",review:{cardIds:["C-M5-02"],quoteIds:["Q-10"],anchorIds:["A-M5-02"]},difficulty:1,tags:["窗口"]},
-    {id:"QZ-M5-04",moduleId:"M5",type:"single",stem:"关于 Token，正确的是？",options:[{key:"A",text:"Token 是模型人格分数"},{key:"B",text:"Token 是输入输出长度的计量单位，常与费用相关"},{key:"C",text:"Token 只存在于图片里"},{key:"D",text:"一个 Token 永远精确等于一个汉字，绝无例外"}],answer:"B",explain:"计量单位；“一字≈一 Token”只是粗略记忆法。",wrongHint:"像水电计量。",review:{cardIds:["C-M5-03"],quoteIds:["Q-09"],anchorIds:["A-M5-03"]},difficulty:2,tags:["Token"]},
-    {id:"QZ-M5-05",moduleId:"M5",type:"judge",stem:"判断：话题已经从“起名”切到完全无关的“发烧怎么办”，更建议新开窗口。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"不相关混聊更易乱与幻觉。",wrongHint:"相关续聊，不相关新开。",review:{cardIds:["C-M5-01","C-M5-02"],quoteIds:["Q-09"],anchorIds:["A-M5-02"]},difficulty:1,tags:["窗口"]},
-    {id:"QZ-M5-06",moduleId:"M5",type:"judge",stem:"判断：图片一定按原始文件 MB 数 1:1 占用同样多的上下文。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"会先编码成模型可处理表示，不能简单用原图 MB 等价。",wrongHint:"编码后再进“脑子”。",review:{cardIds:["C-M5-04"],quoteIds:["Q-09"],anchorIds:["A-M5-03"]},difficulty:2,tags:["多模态"]},
-    {id:"QZ-M5-07",moduleId:"M5",type:"judge",stem:"判断：学习重点是理解“上下文有上限会遗忘”，而不是背死某产品的具体长度数字。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"产品参数会变；机制比数字更重要。",wrongHint:"L10 处理原则。",review:{cardIds:["C-M5-02"],quoteIds:["Q-10"],anchorIds:["A-M5-02"]},difficulty:1,tags:["严谨"]},
-    /* M6 9 */
-    {id:"QZ-M6-01",moduleId:"M6",type:"single",stem:"Skill 在课堂中的核心解释是？",options:[{key:"A",text:"一种必须付费的硬件"},{key:"B",text:"打包好的专业提示词/规范（技能与记忆外挂）"},{key:"C",text:"只能用来点外卖"},{key:"D",text:"与提示词完全无关的数学公式"}],answer:"B",explain:"提示词手册/规范包；可沉淀业务记忆。",wrongHint:"Skills=提示词手册。",review:{cardIds:["C-M6-01"],quoteIds:["Q-11"],anchorIds:["A-M6-01"]},difficulty:1,tags:["Skill"]},
-    {id:"QZ-M6-02",moduleId:"M6",type:"single",stem:"挂上 WPS/表格类 Skill 后，最大直接收益是？",options:[{key:"A",text:"你可以说得更少，仍可能完成专业表格流程"},{key:"B",text:"电脑会自动永久断电"},{key:"C",text:"模型不再需要任何指令"},{key:"D",text:"保证从不需要验收"}],answer:"A",explain:"降低表达门槛，但你仍要验收。",wrongHint:"少说话 ≠ 零责任。",review:{cardIds:["C-M6-02"],quoteIds:["Q-11"],anchorIds:["A-M6-02"]},difficulty:1,tags:["Skill"]},
-    {id:"QZ-M6-03",moduleId:"M6",type:"single",stem:"Agent 相对“纯聊天”最关键的升级是？",options:[{key:"A",text:"字体更好看"},{key:"B",text:"能调用工具去执行，而不仅是生成文字"},{key:"C",text:"永远不消耗 Token"},{key:"D",text:"不能处理复杂任务"}],answer:"B",explain:"加手加脚：浏览器、文档、IM 等执行能力。",wrongHint:"能执行，不只是能说。",review:{cardIds:["C-M6-03"],quoteIds:["Q-12"],anchorIds:["A-M6-03"]},difficulty:1,tags:["Agent"]},
-    {id:"QZ-M6-04",moduleId:"M6",type:"single",stem:"WorkBuddy 与大模型的关系，更准确的是？",options:[{key:"A",text:"WorkBuddy 自己就是唯一大模型，不调用其他模型"},{key:"B",text:"WorkBuddy 是应用/Agent 工具层，背后仍要调用具体大模型"},{key:"C",text:"WorkBuddy 与模型互相替代，装一个就行，概念相同"},{key:"D",text:"WorkBuddy 只能离线运行且无模型"}],answer:"B",explain:"工具/应用 vs 脑子/模型分层。",wrongHint:"应用层还要接模型。",review:{cardIds:["C-M6-03","C-M6-04"],quoteIds:["Q-12"],anchorIds:["A-M6-03"]},difficulty:2,tags:["WorkBuddy"]},
-    {id:"QZ-M6-05",moduleId:"M6",type:"single",stem:"复杂任务为什么建议开“计划模式”？",options:[{key:"A",text:"让它先澄清与规划，你确认后再执行，减少做错返工"},{key:"B",text:"为了让界面变卡"},{key:"C",text:"计划模式会禁止一切输出"},{key:"D",text:"只有点外卖才需要"}],answer:"A",explain:"先计划、先问清、确认后执行。",wrongHint:"复杂任务先对齐方案。",review:{cardIds:["C-M6-04"],quoteIds:["Q-12"],anchorIds:["A-M6-04"]},difficulty:1,tags:["计划模式"]},
-    {id:"QZ-M6-06",moduleId:"M6",type:"judge",stem:"判断：把常用业务背景做成 Skill，可以减少每次重复交代背景。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"Skill 也可当记忆外挂，如景区打卡机案例。",wrongHint:"长期稳定靠 Skill。",review:{cardIds:["C-M6-01","C-M6-02"],quoteIds:["Q-11"],anchorIds:["A-M6-01"]},difficulty:1,tags:["Skill"]},
-    {id:"QZ-M6-07",moduleId:"M6",type:"judge",stem:"判断：Agent 能操作你的办公软件，就意味着可以不经授权监控他人聊天。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"false",explain:"只能在你授权与合规范围内操作；课堂演示能力≠无边界。",wrongHint:"权限与合规。",review:{cardIds:["C-M6-03"],quoteIds:["Q-12"],anchorIds:["A-M6-03"]},difficulty:2,tags:["边界"]},
-    {id:"QZ-M6-08",moduleId:"M6",type:"judge",stem:"判断：费用主要花在模型 Token/会员上；不能简单断言所有 Skill 永远免费。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"课堂说 Skill 好用且常可挂；严谨上平台策略不同，费用重点仍在模型用量。",wrongHint:"L8 修正点。",review:{cardIds:["C-M6-04"],quoteIds:["Q-12"],anchorIds:["A-M6-04"]},difficulty:2,tags:["严谨"]},
-    {id:"QZ-M6-09",moduleId:"M6",type:"judge",stem:"判断：把 AI 当下属多轮验收（不行就改）是课堂推荐的工作方式之一。",options:[{key:"true",text:"正确"},{key:"false",text:"错误"}],answer:"true",explain:"像领导验收；人负责提要求与把关。",wrongHint:"一遍不行两遍。",review:{cardIds:["C-M6-05"],quoteIds:["Q-12"],anchorIds:["A-M6-04"]},difficulty:1,tags:["工作法"]}
-  ]
-};
+const DATA = {"meta": {"title": "AI 主课知识宝典", "subtitle": "每日课堂复习 · 学练回看", "version": "2.0.0", "updateNote": "支持按日更新；每日课程独立进度与题库"}, "courses": [{"id": "day1", "date": "2026-07-15", "title": "Day 1 · 先懂原理再选工具", "subtitle": "应用/模型 · 幻觉 · 上下文 · Skill/Agent", "duration": "约 1h26m", "minuteToken": "obcntzsiesl67451ophasjx2", "summary": "建立 AI 底层心智：应用≠模型、以词猜词、短期记忆与 Token、Skill 与 Agent、务实选型。", "goals": ["区分应用与模型", "理解幻觉边界", "会用上下文与 Token 概念", "知道 Skill/Agent 是什么"], "modules": [{"id": "D1-M1", "title": "应用与模型", "order": 1, "timeRange": "01:30–06:30", "chapterRef": "章节2", "summary": "豆包/Kimi 是应用，背后是模型；通用大模型通识接近，有偏科。", "goals": ["区分应用层与模型层", "理解偏科与选型"], "color": "#3B82F6"}, {"id": "D1-M2", "title": "联网与多模态", "order": 2, "timeRange": "09:00–13:30", "chapterRef": "章节4", "summary": "联网多靠外挂搜索；多模态可看图。按任务选型。", "goals": ["理解联网机制", "按任务选模态"], "color": "#06B6D4"}, {"id": "D1-M3", "title": "幻觉与边界", "order": 3, "timeRange": "13:30–16:00", "chapterRef": "章节5", "summary": "先学不会什么；信息不足/打架会幻觉。", "goals": ["识别边界", "防幻觉动作"], "color": "#F59E0B"}, {"id": "D1-M4", "title": "以词猜词", "order": 4, "timeRange": "16:00–26:00", "chapterRef": "章节6", "summary": "本质是概率预测；信息越充分越可控。", "goals": ["理解猜词隐喻", "会写更具体提示"], "color": "#8B5CF6"}, {"id": "D1-M5", "title": "上下文与 Token", "order": 5, "timeRange": "26:00–47:00", "chapterRef": "章节7", "summary": "会话有短期记忆；窗口会顶掉；Token 是计量。", "goals": ["何时新开窗口", "理解 Token"], "color": "#22C55E"}, {"id": "D1-M6", "title": "Skill / Agent", "order": 6, "timeRange": "48:00–01:19", "chapterRef": "章节8-9", "summary": "Skill=技能+记忆外挂；Agent=装手脚；计划模式。", "goals": ["Skill 是什么", "Agent 与聊天区别"], "color": "#EF4444"}], "cards": [{"id": "D1-C1", "moduleId": "D1-M1", "type": "concept", "title": "应用层 vs 模型层", "body": "豆包、Kimi 等首先是应用/产品，背后再调用大模型。", "classroomQuote": "这些都是应用，它背后都有个模型。", "rigorousNote": "产品层还有账号、插件、搜索等，模型是核心推理引擎。", "tags": ["应用", "模型"], "anchorIds": ["D1-A1"]}, {"id": "D1-C2", "moduleId": "D1-M1", "type": "concept", "title": "通用大模型与偏科", "body": "通识能力接近，差异在数据偏好、模态、上下文、工具。", "classroomQuote": "本质上都是通用大模型……偏好不一样。", "rigorousNote": "同属通用模型≠无差异，选型看任务。", "tags": ["偏科"], "anchorIds": ["D1-A1"]}, {"id": "D1-C3", "moduleId": "D1-M2", "type": "concept", "title": "联网=外挂搜索", "body": "模型知识有截止；查今日新闻通常靠搜索工具再喂回模型。", "classroomQuote": "给它外头又加了个浏览器。", "rigorousNote": "某品牌唯一能联网已过时，多数产品可挂搜索。", "tags": ["联网"], "anchorIds": ["D1-A2"]}, {"id": "D1-C4", "moduleId": "D1-M2", "type": "concept", "title": "多模态", "body": "多模态可处理图/音/视频/文档；纯文本任务文本模型仍强。", "classroomQuote": "DeepSeek……不是多模态……豆包是。", "rigorousNote": "以当前入口是否支持多模态为准，能力会升级。", "tags": ["多模态"], "anchorIds": ["D1-A2"]}, {"id": "D1-C5", "moduleId": "D1-M3", "type": "boundary", "title": "先学边界", "body": "课堂三分：幻觉/遗忘/瞎编，帮助定位问题。", "classroomQuote": "不要学习它会啥，要学习它不会啥。", "rigorousNote": "学术上多统称 hallucination；三分法是教学脚手架。", "tags": ["幻觉"], "anchorIds": ["D1-A3"]}, {"id": "D1-C6", "moduleId": "D1-M3", "type": "method", "title": "防幻觉", "body": "给足信息、话题拆窗、关键事实核实。", "classroomQuote": "他脑子里信息打架……幻觉就这么来的。", "rigorousNote": "把 AI 当同事：沟通清楚+人工终审。", "tags": ["方法"], "anchorIds": ["D1-A3"]}, {"id": "D1-C7", "moduleId": "D1-M4", "type": "concept", "title": "以词猜词", "body": "逐步预测下一词；前提越多候选越少。", "classroomQuote": "本质上就是一个以词猜词游戏。", "rigorousNote": "有效教学隐喻；本质是序列建模与概率生成。", "tags": ["原理"], "anchorIds": ["D1-A4"]}, {"id": "D1-C8", "moduleId": "D1-M4", "type": "method", "title": "描述越具体越准", "body": "目标、字段、格式写清，输出更可控。", "classroomQuote": "描述得越具体，回答就越准确。", "rigorousNote": "应用层正确；原理层=约束概率空间。", "tags": ["提示词"], "anchorIds": ["D1-A4"]}, {"id": "D1-C9", "moduleId": "D1-M5", "type": "concept", "title": "短期记忆", "body": "同会话有上下文；新会话默认清零。", "classroomQuote": "以一个会话为单元的记忆叫短期记忆。", "rigorousNote": "部分产品另有长期记忆，与会话上下文不同。", "tags": ["记忆"], "anchorIds": ["D1-A5"]}, {"id": "D1-C10", "moduleId": "D1-M5", "type": "concept", "title": "Token", "body": "计量输入输出长度，常与费用相关。", "classroomQuote": "一个汉字等于一个 token，大概。", "rigorousNote": "粗略记忆法；实际随分词器约 1～1.5+ token/字。", "tags": ["Token"], "anchorIds": ["D1-A5"]}, {"id": "D1-C11", "moduleId": "D1-M6", "type": "concept", "title": "Skill", "body": "打包的专业提示词/规范，可当技能与记忆外挂。", "classroomQuote": "提示词手册……本质上还是一堆提示词。", "rigorousNote": "也可能含工具/脚本，不只是纯文本。", "tags": ["Skill"], "anchorIds": ["D1-A6"]}, {"id": "D1-C12", "moduleId": "D1-M6", "type": "concept", "title": "Agent", "body": "在模型上装手脚，能执行而不只聊天。", "classroomQuote": "通用大模型给它加了手和脚。", "rigorousNote": "WorkBuddy 是工具层，背后仍调具体模型。", "tags": ["Agent"], "anchorIds": ["D1-A6"]}], "quotes": [{"id": "D1-Q1", "moduleId": "D1-M1", "text": "先懂原理，再选工具。", "source": "课堂", "anchorId": "D1-A1"}, {"id": "D1-Q2", "moduleId": "D1-M2", "text": "不是模型自己上网，是给它装了浏览器。", "source": "课堂", "anchorId": "D1-A2"}, {"id": "D1-Q3", "moduleId": "D1-M3", "text": "不要只追 AI 会什么，更要理解边界。", "source": "课堂", "anchorId": "D1-A3"}, {"id": "D1-Q4", "moduleId": "D1-M4", "text": "你给的条件越多，它乱猜的空间越小。", "source": "课堂", "anchorId": "D1-A4"}, {"id": "D1-Q5", "moduleId": "D1-M5", "text": "短期记忆靠会话，长期稳定靠 Skill。", "source": "课堂", "anchorId": "D1-A5"}, {"id": "D1-Q6", "moduleId": "D1-M6", "text": "Skill 降低表达门槛，Agent 扩展执行边界。", "source": "课堂", "anchorId": "D1-A6"}], "anchors": [{"id": "D1-A1", "moduleId": "D1-M1", "label": "应用与模型", "timeCode": "00:01:34", "chapter": "章节2", "transcriptHint": "豆包啦、Kimi 啦，这些都是应用，它背后都有个模型。", "cardIds": ["D1-C1", "D1-C2"], "quoteIds": ["D1-Q1"]}, {"id": "D1-A2", "moduleId": "D1-M2", "label": "联网与多模态", "timeCode": "00:09:30", "chapter": "章节4", "transcriptHint": "给它外头又加了个浏览器……DeepSeek 不是多模态。", "cardIds": ["D1-C3", "D1-C4"], "quoteIds": ["D1-Q2"]}, {"id": "D1-A3", "moduleId": "D1-M3", "label": "幻觉边界", "timeCode": "00:14:00", "chapter": "章节5", "transcriptHint": "你要学习它不会啥……信息打架所以幻觉。", "cardIds": ["D1-C5", "D1-C6"], "quoteIds": ["D1-Q3"]}, {"id": "D1-A4", "moduleId": "D1-M4", "label": "以词猜词", "timeCode": "00:15:55", "chapter": "章节6", "transcriptHint": "它本质上就是一个以词猜词游戏。", "cardIds": ["D1-C7", "D1-C8"], "quoteIds": ["D1-Q4"]}, {"id": "D1-A5", "moduleId": "D1-M5", "label": "上下文 Token", "timeCode": "00:30:36", "chapter": "章节7", "transcriptHint": "短期记忆……新对话就没有记忆了……Token 是计量。", "cardIds": ["D1-C9", "D1-C10"], "quoteIds": ["D1-Q5"]}, {"id": "D1-A6", "moduleId": "D1-M6", "label": "Skill Agent", "timeCode": "00:48:48", "chapter": "章节8-9", "transcriptHint": "Skills 是提示词手册……加了手和脚。", "cardIds": ["D1-C11", "D1-C12"], "quoteIds": ["D1-Q6"]}], "questions": [{"id": "D1-QZ01", "moduleId": "D1-M1", "type": "single", "stem": "豆包/Kimi 与大模型关系？", "options": [{"key": "A", "text": "它们本身就是模型"}, {"key": "B", "text": "首先是应用/产品，背后再调模型"}, {"key": "C", "text": "只能搜索"}, {"key": "D", "text": "与模型无关"}], "answer": "B", "explain": "应用层与模型层分层。", "wrongHint": "APP 是应用，背后才是模型。", "review": {"cardIds": ["D1-C1"], "quoteIds": ["D1-Q1"], "anchorIds": ["D1-A1"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ02", "moduleId": "D1-M1", "type": "judge", "stem": "判断：说各家通用大模型完全没区别，作为严谨结论合适。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "false", "explain": "同属通用模型，但仍有模态/数据/工具差异。", "wrongHint": "同属≠无差异", "review": {"cardIds": ["D1-C2"], "quoteIds": ["D1-Q1"], "anchorIds": ["D1-A1"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ03", "moduleId": "D1-M2", "type": "single", "stem": "能聊今天新闻更接近？", "options": [{"key": "A", "text": "权重每天重训"}, {"key": "B", "text": "外挂搜索后交给模型总结"}, {"key": "C", "text": "天生实时数据库"}, {"key": "D", "text": "参数大就自动知道"}], "answer": "B", "explain": "联网靠工具链。", "wrongHint": "加了浏览器", "review": {"cardIds": ["D1-C3"], "quoteIds": ["D1-Q2"], "anchorIds": ["D1-A2"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ04", "moduleId": "D1-M2", "type": "judge", "stem": "判断：今天仍可认为只有 Kimi 能联网。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "false", "explain": "多数产品可挂搜索，课堂原话是当时举例。", "wrongHint": "能力会变", "review": {"cardIds": ["D1-C3"], "quoteIds": ["D1-Q2"], "anchorIds": ["D1-A2"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ05", "moduleId": "D1-M3", "type": "single", "stem": "学习 AI 更合理的顺序？", "options": [{"key": "A", "text": "先背品牌广告"}, {"key": "B", "text": "先理解边界再学能力"}, {"key": "C", "text": "只学快捷键"}, {"key": "D", "text": "先充最贵会员"}], "answer": "B", "explain": "先学不会什么。", "wrongHint": "边界优先", "review": {"cardIds": ["D1-C5"], "quoteIds": ["D1-Q3"], "anchorIds": ["D1-A3"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ06", "moduleId": "D1-M3", "type": "judge", "stem": "判断：对话信息与检索信息冲突时，模型可能答错。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "信息打架是幻觉来源。", "wrongHint": "信息打架", "review": {"cardIds": ["D1-C6"], "quoteIds": ["D1-Q3"], "anchorIds": ["D1-A3"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ07", "moduleId": "D1-M4", "type": "single", "stem": "以词猜词主要说明？", "options": [{"key": "A", "text": "只返回链接"}, {"key": "B", "text": "基于上下文预测后续内容"}, {"key": "C", "text": "完全随机"}, {"key": "D", "text": "只复制原文"}], "answer": "B", "explain": "概率预测。", "wrongHint": "接词游戏", "review": {"cardIds": ["D1-C7"], "quoteIds": ["D1-Q4"], "anchorIds": ["D1-A4"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ08", "moduleId": "D1-M4", "type": "judge", "stem": "判断：很多“模型不行”其实是信息给得不够。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "给足条件是第一原则。", "wrongHint": "描述要具体", "review": {"cardIds": ["D1-C8"], "quoteIds": ["D1-Q4"], "anchorIds": ["D1-A4"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ09", "moduleId": "D1-M5", "type": "single", "stem": "短期记忆主要指？", "options": [{"key": "A", "text": "永久记住所有人"}, {"key": "B", "text": "当前会话上下文"}, {"key": "C", "text": "只有图片有记忆"}, {"key": "D", "text": "U盘文件"}], "answer": "B", "explain": "会话级上下文。", "wrongHint": "新会话清零", "review": {"cardIds": ["D1-C9"], "quoteIds": ["D1-Q5"], "anchorIds": ["D1-A5"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ10", "moduleId": "D1-M5", "type": "judge", "stem": "判断：Token 是输入输出长度的计量单位。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "常与费用相关；一字一 token 是粗略记忆。", "wrongHint": "计量单位", "review": {"cardIds": ["D1-C10"], "quoteIds": ["D1-Q5"], "anchorIds": ["D1-A5"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ11", "moduleId": "D1-M6", "type": "single", "stem": "Skill 核心解释？", "options": [{"key": "A", "text": "必须付费硬件"}, {"key": "B", "text": "打包的专业提示词/规范"}, {"key": "C", "text": "只能点外卖"}, {"key": "D", "text": "与提示词无关"}], "answer": "B", "explain": "技能+记忆外挂。", "wrongHint": "提示词手册", "review": {"cardIds": ["D1-C11"], "quoteIds": ["D1-Q6"], "anchorIds": ["D1-A6"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ12", "moduleId": "D1-M6", "type": "single", "stem": "Agent 相对纯聊天的关键升级？", "options": [{"key": "A", "text": "字体更好"}, {"key": "B", "text": "能调用工具执行"}, {"key": "C", "text": "永不耗 Token"}, {"key": "D", "text": "不能做复杂任务"}], "answer": "B", "explain": "装手脚。", "wrongHint": "能执行", "review": {"cardIds": ["D1-C12"], "quoteIds": ["D1-Q6"], "anchorIds": ["D1-A6"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ13", "moduleId": "D1-M6", "type": "judge", "stem": "判断：WorkBuddy 是应用/工具层，背后仍要调具体大模型。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "应用≠模型。", "wrongHint": "分层", "review": {"cardIds": ["D1-C12"], "quoteIds": ["D1-Q6"], "anchorIds": ["D1-A6"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ14", "moduleId": "D1-M5", "type": "judge", "stem": "判断：不相关话题更建议新开窗口。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "混聊易幻觉。", "wrongHint": "相关续聊不相关新开", "review": {"cardIds": ["D1-C9"], "quoteIds": ["D1-Q5"], "anchorIds": ["D1-A5"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ15", "moduleId": "D1-M4", "type": "single", "stem": "更好的提示是？", "options": [{"key": "A", "text": "帮我弄一下"}, {"key": "B", "text": "做个表"}, {"key": "C", "text": "把数据做成三列表格，含地区/品类/金额，按金额降序输出 Markdown 表"}, {"key": "D", "text": "你看着办"}], "answer": "C", "explain": "结构化表达。", "wrongHint": "具体>模糊", "review": {"cardIds": ["D1-C8"], "quoteIds": ["D1-Q4"], "anchorIds": ["D1-A4"]}, "difficulty": 1, "tags": []}, {"id": "D1-QZ16", "moduleId": "D1-M2", "type": "judge", "stem": "判断：截图做表应优先关注是否多模态+能否落地文件。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "读图+执行。", "wrongHint": "多模态", "review": {"cardIds": ["D1-C4"], "quoteIds": ["D1-Q2"], "anchorIds": ["D1-A2"]}, "difficulty": 2, "tags": []}]}, {"id": "day2", "date": "2026-07-16", "title": "Day 2 · 会做工具 · 会说需求", "subtitle": "Vibe Coding · Workflow · 计划模式 · 多轮验收", "duration": "约 1h43m", "minuteToken": "obcnuop1h178nwd26841e9nl", "summary": "从会聊走向会做：现场做压缩/水印工具，理解 Agent/Workflow/Vibe Coding，学会计划模式与大白话提需求。", "goals": ["会用多轮修正做小工具", "说清 Agent 与 Workflow", "理解 Prompt 三阶段与 Skills 升级", "会用计划模式与验收式对话"], "modules": [{"id": "D2-M1", "title": "小工具思维 / Vibe Coding", "order": 1, "timeRange": "00:00–09:00", "chapterRef": "开场案例", "summary": "日常小痛点可做成工具；描述需求→AI 写代码→得到产品，这个过程叫 Vibe Coding。", "goals": ["小问题工具化", "理解 Vibe Coding"], "color": "#3B82F6"}, {"id": "D2-M2", "title": "多轮修正与验收", "order": 2, "timeRange": "03:48–09:00", "chapterRef": "压缩工具迭代", "summary": "工具很少一次完美；遇到问题就说，让 AI 改：格式、画质、版本清理、自动压缩。", "goals": ["多轮对话修正", "自己验收"], "color": "#06B6D4"}, {"id": "D2-M3", "title": "Agent 智能体再理解", "order": 3, "timeRange": "22:44–28:30", "chapterRef": "计划执行现场", "summary": "Agent 不是一问一答：可拆多任务、互相对话协作，为达成目标自主推进。", "goals": ["Agent vs 聊天", "多智能体协作感"], "color": "#F59E0B"}, {"id": "D2-M4", "title": "Workflow 工作流", "order": 4, "timeRange": "28:23–33:30", "chapterRef": "SOP 类比", "summary": "Workflow=工作流程/SOP；可把多步 AI 串起来，一次输入得到最终输出。", "goals": ["Workflow=流程", "串工具省步骤"], "color": "#8B5CF6"}, {"id": "D2-M5", "title": "Prompt 三阶段与 Skills", "order": 5, "timeRange": "34:18–44:00", "chapterRef": "材料讲解", "summary": "提示词进化：一句话→上下文→Skills；Skills 可复用、可分享、可迭代，甚至是能力包。", "goals": ["三阶段", "Skills 新理解"], "color": "#22C55E"}, {"id": "D2-M6", "title": "计划模式 · 说话方式 · 交付", "order": 6, "timeRange": "20:25–01:42", "chapterRef": "知识宝典与水印", "summary": "复杂任务开计划模式先确认；大白话直说问题；网页/EXE/GitHub 是不同交付方式。", "goals": ["何时计划模式", "大白话提需求", "交付与分享"], "color": "#EF4444"}], "cards": [{"id": "D2-C1", "moduleId": "D2-M1", "type": "demo", "title": "图片压缩小工具案例", "body": "没有会员时，可用 Agent 现场做一个压缩工具：批量、输出到桌面、拖入自动压缩。", "classroomQuote": "我就用 WorkBuddy 自己现场做了一个压缩图片工具。", "rigorousNote": "适合小而明确的重复劳动；关键结果仍要自己看。", "tags": ["案例", "工具"], "anchorIds": ["D2-A1"]}, {"id": "D2-C2", "moduleId": "D2-M1", "type": "concept", "title": "Vibe Coding 是什么", "body": "不是 AI 写几行代码四个字，而是：人描述需求 → AI 生成代码 → 变成可用产品 的整段流程。", "classroomQuote": "用户描述一下需求……AI 生成代码……变成产品，这个过程叫 vibe coding。", "rigorousNote": "课堂现场做压缩/水印/知识宝典，都是 Vibe Coding 实践。", "tags": ["VibeCoding"], "anchorIds": ["D2-A1"]}, {"id": "D2-C3", "moduleId": "D2-M1", "type": "method", "title": "垂直应用 vs 自己做", "body": "伽马等 AI PPT 是垂直场景应用；有了 Agent 后，很多专用工具可按需自建。", "classroomQuote": "他们专门就是用 AI 大模型去开发专门场景应用……有了 agent 就不这么干了。", "rigorousNote": "不是绝对不用垂直工具，而是多了一条自己做的路。", "tags": ["选型"], "anchorIds": ["D2-A1"]}, {"id": "D2-C4", "moduleId": "D2-M2", "type": "method", "title": "遇到啥就说啥", "body": "第一次做完常有问题：别人打不开→做 EXE；路径找不到→教复制地址栏；PNG 变 JPG→改格式；画质糊→改算法；版本乱→清理。", "classroomQuote": "我遇到啥我就给他发啥……他是不是就按照我的去改了？", "rigorousNote": "多轮修正=验收式协作，不是一次提示写完美。", "tags": ["迭代"], "anchorIds": ["D2-A2"]}, {"id": "D2-C5", "moduleId": "D2-M2", "type": "boundary", "title": "自己要会用、会验", "body": "工具好不好用，自己最清楚；复杂东西需要一步步纠正。", "classroomQuote": "像这种复杂的东西，你需要一步步纠正吗？……多次对话进行修正。", "rigorousNote": "AI 加速实现，人负责标准与验收。", "tags": ["验收"], "anchorIds": ["D2-A2"]}, {"id": "D2-C6", "moduleId": "D2-M3", "type": "concept", "title": "Agent=智能体", "body": "Agent/智能体：不只是大模型一问一答，而是可多模型/多任务协作、按流程运转，为达成目标推进。", "classroomQuote": "智能体……不是你一问我一答……他们自己可能之间都会相互对话。", "rigorousNote": "WorkBuddy/Codex 可视为 Agent 平台。", "tags": ["Agent"], "anchorIds": ["D2-A3"]}, {"id": "D2-C7", "moduleId": "D2-M3", "type": "concept", "title": "Agent 平台 vs 豆包聊天", "body": "对豆包：你一句它一句。对 Agent 平台：你一句，它可能拆多个子任务自己跑（读文件、调研、写代码）。", "classroomQuote": "它基本上还没回你话呢，它在自己跟自己说话呢……分出了两个小人。", "rigorousNote": "任务越复杂，工作时间往往越长，这是正常的。", "tags": ["Agent"], "anchorIds": ["D2-A3"]}, {"id": "D2-C8", "moduleId": "D2-M4", "type": "concept", "title": "Workflow=工作流/SOP", "body": "Workflow 中文=工作流，大白话=工作流程，类似企业 SOP：先做什么后做什么。", "classroomQuote": "workflow 中文名字叫工作流……做的就是个 SOP。", "rigorousNote": "人有巡检表格流程；AI 也可有固定执行链路。", "tags": ["Workflow"], "anchorIds": ["D2-A4"]}, {"id": "D2-C9", "moduleId": "D2-M4", "type": "demo", "title": "串起来的价值", "body": "例：高清放大→裁剪→加水印。原来要三次输入输出；串成 workflow 后一次输入拿最终结果。", "classroomQuote": "我只需要一个输入，他们这三个互相一传递，再给我个输出。", "rigorousNote": "抓新闻→AI 总结→推飞书，也是典型 workflow。", "tags": ["Workflow"], "anchorIds": ["D2-A4"]}, {"id": "D2-C10", "moduleId": "D2-M5", "type": "concept", "title": "Prompt 进化三阶段", "body": "① 一次性显式指令，每次从零写；② 有 Context 上下文，可少说；③ Skills 可复用/分享/迭代。", "classroomQuote": "提示词的进化三阶段……Skills……可复用、可分享、可迭代。", "rigorousNote": "发展方向是让人越来越省事。", "tags": ["Prompt", "Skills"], "anchorIds": ["D2-A5"]}, {"id": "D2-C11", "moduleId": "D2-M5", "type": "concept", "title": "Skills 升级理解", "body": "Skills 不只是提示词集合，还可含工具（手和脚）：查文档、开表格、连 IM。= 经验+步骤的能力扩展包。", "classroomQuote": "里头还可以放工具……钳子螺丝……skill 等于经验加步骤的扩展包。", "rigorousNote": "可把一块业务能力（如文旅打卡机）封装成 Skill。", "tags": ["Skills"], "anchorIds": ["D2-A5"]}, {"id": "D2-C12", "moduleId": "D2-M5", "type": "method", "title": "Prompt 要素与示例", "body": "说清背景、目标、要求；最核心常是给示例/样本（如图片、格式样例）。", "classroomQuote": "最核心的叫示例……一定要给他样本。", "rigorousNote": "坏例子：帮我整理一下。好例子：把上周五会议三个待办整理成表，含负责人与截止时间。", "tags": ["Prompt"], "anchorIds": ["D2-A5"]}, {"id": "D2-C13", "moduleId": "D2-M6", "type": "method", "title": "计划模式何时开", "body": "怕 AI 直接开干做错：开计划模式，先提问确认再执行。流程长/复杂时更值得开。", "classroomQuote": "把计划模式打开……他要给我提问题。", "rigorousNote": "Workflow 短、需求极清楚时可不开，提高速度。", "tags": ["计划模式"], "anchorIds": ["D2-A6"]}, {"id": "D2-C14", "moduleId": "D2-M6", "type": "method", "title": "大白话提需求", "body": "别客套请帮我调整……；像跟人抱怨一样直说现象与感受。", "classroomQuote": "你就直话直说……我发现这个工具……把预览区挡住了……非常不方便。", "rigorousNote": "把 AI 当人沟通，比当命令行更有效。", "tags": ["提示词"], "anchorIds": ["D2-A6"]}, {"id": "D2-C15", "moduleId": "D2-M6", "type": "method", "title": "交付与分享", "body": "本地 HTML 自己电脑能开；手机分享常需部署到 GitHub Pages 等拿到链接；也可用 EXE 给同事双击。", "classroomQuote": "想手机打开，必须得发布到 GitHub……把链接分享出去。", "rigorousNote": "网页适合跨端；EXE 适合仅电脑分发。", "tags": ["交付"], "anchorIds": ["D2-A6"]}], "quotes": [{"id": "D2-Q1", "moduleId": "D2-M1", "text": "小问题，做成小工具，自己用。", "source": "课堂", "anchorId": "D2-A1"}, {"id": "D2-Q2", "moduleId": "D2-M1", "text": "描述需求 → AI 写代码 → 变成产品，这叫 Vibe Coding。", "source": "课堂", "anchorId": "D2-A1"}, {"id": "D2-Q3", "moduleId": "D2-M2", "text": "遇到啥就说啥，让它按你的反馈改。", "source": "课堂", "anchorId": "D2-A2"}, {"id": "D2-Q4", "moduleId": "D2-M3", "text": "Agent 不是一问一答，是为了达成目标自己往前跑。", "source": "课堂", "anchorId": "D2-A3"}, {"id": "D2-Q5", "moduleId": "D2-M4", "text": "Workflow 就是工作流程，像 SOP 一样先做什么后做什么。", "source": "课堂", "anchorId": "D2-A4"}, {"id": "D2-Q6", "moduleId": "D2-M5", "text": "Skills：可复用、可分享、可迭代。", "source": "课堂", "anchorId": "D2-A5"}, {"id": "D2-Q7", "moduleId": "D2-M6", "text": "复杂任务先计划确认，简单任务直接干。", "source": "课堂", "anchorId": "D2-A6"}, {"id": "D2-Q8", "moduleId": "D2-M6", "text": "别客套，大白话把问题说清楚。", "source": "课堂", "anchorId": "D2-A6"}], "anchors": [{"id": "D2-A1", "moduleId": "D2-M1", "label": "压缩工具与 Vibe Coding", "timeCode": "00:01:51", "chapter": "开场", "transcriptHint": "WorkBuddy 现场做压缩工具……描述需求 AI 生成代码变成产品。", "cardIds": ["D2-C1", "D2-C2", "D2-C3"], "quoteIds": ["D2-Q1", "D2-Q2"]}, {"id": "D2-A2", "moduleId": "D2-M2", "label": "多轮修正", "timeCode": "00:03:48", "chapter": "迭代", "transcriptHint": "EXE、路径、PNG/JPG、画质、清理旧版本……遇到啥就发啥。", "cardIds": ["D2-C4", "D2-C5"], "quoteIds": ["D2-Q3"]}, {"id": "D2-A3", "moduleId": "D2-M3", "label": "Agent 多智能体", "timeCode": "00:24:29", "chapter": "智能体", "transcriptHint": "两个 agent 一起走……不是一问一答，自己互相协作。", "cardIds": ["D2-C6", "D2-C7"], "quoteIds": ["D2-Q4"]}, {"id": "D2-A4", "moduleId": "D2-M4", "label": "Workflow/SOP", "timeCode": "00:28:23", "chapter": "工作流", "transcriptHint": "工作流=SOP……放大裁剪水印串起来一次输入一次输出。", "cardIds": ["D2-C8", "D2-C9"], "quoteIds": ["D2-Q5"]}, {"id": "D2-A5", "moduleId": "D2-M5", "label": "Prompt 三阶段与 Skills", "timeCode": "00:36:50", "chapter": "材料", "transcriptHint": "一次性指令→上下文→Skills；可复用可分享可迭代。", "cardIds": ["D2-C10", "D2-C11", "D2-C12"], "quoteIds": ["D2-Q6"]}, {"id": "D2-A6", "moduleId": "D2-M6", "label": "计划模式与大白话", "timeCode": "00:20:25", "chapter": "实践", "transcriptHint": "计划模式先提问；直说预览被挡住；部署 GitHub 分享。", "cardIds": ["D2-C13", "D2-C14", "D2-C15"], "quoteIds": ["D2-Q7", "D2-Q8"]}], "questions": [{"id": "D2-QZ01", "moduleId": "D2-M1", "type": "single", "stem": "课堂现场做图片压缩工具，最能说明？", "options": [{"key": "A", "text": "必须买 WPS 会员"}, {"key": "B", "text": "明确小痛点可用 Agent 自建小工具"}, {"key": "C", "text": "只能截图压缩"}, {"key": "D", "text": "普通人永远做不了工具"}], "answer": "B", "explain": "小问题工具化。", "wrongHint": "压缩工具案例", "review": {"cardIds": ["D2-C1"], "quoteIds": ["D2-Q1"], "anchorIds": ["D2-A1"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ02", "moduleId": "D2-M1", "type": "single", "stem": "Vibe Coding 更准确是？", "options": [{"key": "A", "text": "只背代码语法"}, {"key": "B", "text": "人描述需求→AI 写代码→变成产品的过程"}, {"key": "C", "text": "只在黑板上画流程图"}, {"key": "D", "text": "禁止使用 AI"}], "answer": "B", "explain": "整段流程名。", "wrongHint": "不是只写代码四字", "review": {"cardIds": ["D2-C2"], "quoteIds": ["D2-Q2"], "anchorIds": ["D2-A1"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ03", "moduleId": "D2-M1", "type": "judge", "stem": "判断：有了 Agent 后，所有垂直 AI PPT 工具都绝对没用了。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "false", "explain": "多了一条自建路径，不代表垂直工具一律无价值。", "wrongHint": "不是绝对", "review": {"cardIds": ["D2-C3"], "quoteIds": ["D2-Q1"], "anchorIds": ["D2-A1"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ04", "moduleId": "D2-M2", "type": "single", "stem": "工具第一次做完别人打不开，课堂做法更接近？", "options": [{"key": "A", "text": "放弃"}, {"key": "B", "text": "按反馈继续改，例如做 EXE 方便分发"}, {"key": "C", "text": "永远只给源码"}, {"key": "D", "text": "要求对方先学编程"}], "answer": "B", "explain": "多轮修正。", "wrongHint": "遇到啥说啥", "review": {"cardIds": ["D2-C4"], "quoteIds": ["D2-Q3"], "anchorIds": ["D2-A2"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ05", "moduleId": "D2-M2", "type": "judge", "stem": "判断：复杂工具通常需要多次对话修正，而不是一次提示完美。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "验收式协作。", "wrongHint": "一步步纠正", "review": {"cardIds": ["D2-C5"], "quoteIds": ["D2-Q3"], "anchorIds": ["D2-A2"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ06", "moduleId": "D2-M3", "type": "single", "stem": "Agent/智能体与普通聊天最大区别？", "options": [{"key": "A", "text": "字体不同"}, {"key": "B", "text": "可拆任务协作推进目标，而非仅一问一答"}, {"key": "C", "text": "不能读文件"}, {"key": "D", "text": "永远瞬间完成任何事"}], "answer": "B", "explain": "为目标运转。", "wrongHint": "两个小人协作", "review": {"cardIds": ["D2-C6", "D2-C7"], "quoteIds": ["D2-Q4"], "anchorIds": ["D2-A3"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ07", "moduleId": "D2-M3", "type": "judge", "stem": "判断：任务越复杂，Agent 工作时间变长往往不正常，应立刻换掉。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "false", "explain": "复杂度决定思考与执行量，变慢常合理。", "wrongHint": "拿钥匙 vs 想暴富", "review": {"cardIds": ["D2-C7"], "quoteIds": ["D2-Q4"], "anchorIds": ["D2-A3"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ08", "moduleId": "D2-M4", "type": "single", "stem": "Workflow 大白话最接近？", "options": [{"key": "A", "text": "随机聊天"}, {"key": "B", "text": "工作流程/SOP：先做什么后做什么"}, {"key": "C", "text": "只能写诗"}, {"key": "D", "text": "硬件接口名"}], "answer": "B", "explain": "巡检表格类比。", "wrongHint": "工作流", "review": {"cardIds": ["D2-C8"], "quoteIds": ["D2-Q5"], "anchorIds": ["D2-A4"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ09", "moduleId": "D2-M4", "type": "judge", "stem": "判断：把放大、裁剪、水印串起来，可实现一次输入拿最终结果。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "串工具的价值。", "wrongHint": "一个输入一个输出", "review": {"cardIds": ["D2-C9"], "quoteIds": ["D2-Q5"], "anchorIds": ["D2-A4"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ10", "moduleId": "D2-M5", "type": "single", "stem": "提示词进化三阶段顺序？", "options": [{"key": "A", "text": "Skills→无上下文→每次从零"}, {"key": "B", "text": "一次性指令→上下文→Skills"}, {"key": "C", "text": "只有 Skills 一种"}, {"key": "D", "text": "先 Skills 再禁止上下文"}], "answer": "B", "explain": "三阶段。", "wrongHint": "越来越省事", "review": {"cardIds": ["D2-C10"], "quoteIds": ["D2-Q6"], "anchorIds": ["D2-A5"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ11", "moduleId": "D2-M5", "type": "single", "stem": "Skills 更完整理解？", "options": [{"key": "A", "text": "只能是一句话"}, {"key": "B", "text": "经验+步骤的扩展包，可含提示词与工具"}, {"key": "C", "text": "不能分享"}, {"key": "D", "text": "写完永远不能更新"}], "answer": "B", "explain": "可复用可分享可迭代。", "wrongHint": "钳子螺丝", "review": {"cardIds": ["D2-C11"], "quoteIds": ["D2-Q6"], "anchorIds": ["D2-A5"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ12", "moduleId": "D2-M5", "type": "judge", "stem": "判断：给 AI 示例/样本，往往比空泛说帮我整理一下更有效。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "示例是核心要素之一。", "wrongHint": "样本很重要", "review": {"cardIds": ["D2-C12"], "quoteIds": ["D2-Q6"], "anchorIds": ["D2-A5"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ13", "moduleId": "D2-M6", "type": "single", "stem": "计划模式的核心价值？", "options": [{"key": "A", "text": "让界面变卡"}, {"key": "B", "text": "先确认模糊点再执行，减少做错返工"}, {"key": "C", "text": "禁止一切输出"}, {"key": "D", "text": "只用于点外卖"}], "answer": "B", "explain": "中间层确认。", "wrongHint": "先提问再干", "review": {"cardIds": ["D2-C13"], "quoteIds": ["D2-Q7"], "anchorIds": ["D2-A6"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ14", "moduleId": "D2-M6", "type": "judge", "stem": "判断：流程很长、需求复杂时更适合开计划模式。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "Workflow 复杂时开。", "wrongHint": "简单可不开", "review": {"cardIds": ["D2-C13"], "quoteIds": ["D2-Q7"], "anchorIds": ["D2-A6"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ15", "moduleId": "D2-M6", "type": "single", "stem": "反馈 UI 问题更好的说法？", "options": [{"key": "A", "text": "请帮我优化一下体验谢谢"}, {"key": "B", "text": "我发现点设置后蒙层挡住预览，无法实时看大小，很不方便"}, {"key": "C", "text": "不好用"}, {"key": "D", "text": "你自己看着改"}], "answer": "B", "explain": "大白话说现象。", "wrongHint": "当人说话", "review": {"cardIds": ["D2-C14"], "quoteIds": ["D2-Q8"], "anchorIds": ["D2-A6"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ16", "moduleId": "D2-M6", "type": "judge", "stem": "判断：本地 HTML 要方便手机分享，常见做法是部署到 GitHub Pages 拿到链接。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "课堂部署路径。", "wrongHint": "链接分享", "review": {"cardIds": ["D2-C15"], "quoteIds": ["D2-Q7"], "anchorIds": ["D2-A6"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ17", "moduleId": "D2-M5", "type": "single", "stem": "Context 在课堂中文对应？", "options": [{"key": "A", "text": "工作流"}, {"key": "B", "text": "上下文"}, {"key": "C", "text": "硬件驱动"}, {"key": "D", "text": "会员等级"}], "answer": "B", "explain": "对话上下内容。", "wrongHint": "context=上下文", "review": {"cardIds": ["D2-C10"], "quoteIds": ["D2-Q6"], "anchorIds": ["D2-A5"]}, "difficulty": 1, "tags": []}, {"id": "D2-QZ18", "moduleId": "D2-M3", "type": "judge", "stem": "判断：用跑马拉松比喻 Agent——为达成目标会自己规划跑完全程，这个方向基本对。", "options": [{"key": "true", "text": "正确"}, {"key": "false", "text": "错误"}], "answer": "true", "explain": "课堂肯定了该比喻方向。", "wrongHint": "为目标推进", "review": {"cardIds": ["D2-C6"], "quoteIds": ["D2-Q4"], "anchorIds": ["D2-A3"]}, "difficulty": 2, "tags": []}]}]};
 
-/* =========================
-   STATE
-   ========================= */
-const STORE_KEY = "ai-kb-v1";
-const defaultState = () => ({
-  learnedModuleIds: [],
-  quizHistory: [],
-  wrongIds: [],
-  masterCount: {}, // qid -> consecutive correct while in wrongbook path
-  masteredIds: [],
-  settings: { fontScale: 1 },
-  lastOpen: new Date().toISOString(),
-  today: { date: dayKey(), learned: false, quizCount: 0, reviewed: false },
-  lastModuleId: "M1",
-  quoteIndex: 0
-});
+
+const STORE_KEY = "ai-kb-v2";
+const SHARE_URL = "https://zaizizaizi.github.io/ai-lesson-kb/";
 
 function dayKey(){
   const d = new Date();
-  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
 }
-
+function defaultDayState(){
+  return {
+    learnedModuleIds: [],
+    quizHistory: [],
+    wrongIds: [],
+    masterCount: {},
+    masteredIds: [],
+    lastModuleId: null,
+    quoteIndex: 0,
+    today: { date: dayKey(), learned: false, quizCount: 0, reviewed: false }
+  };
+}
+function defaultState(){
+  return {
+    version: 2,
+    currentCourseId: DATA.courses[DATA.courses.length-1].id,
+    settings: { fontScale: 1 },
+    days: {},
+    lastOpen: new Date().toISOString()
+  };
+}
 function loadState(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
-    if(!raw) return defaultState();
-    const s = Object.assign(defaultState(), JSON.parse(raw));
-    if(s.today?.date !== dayKey()){
-      s.today = { date: dayKey(), learned: false, quizCount: 0, reviewed: false };
+    if(!raw){
+      // migrate v1 if present
+      const v1 = localStorage.getItem("ai-kb-v1");
+      const s = defaultState();
+      if(v1){
+        try{
+          const old = JSON.parse(v1);
+          const d = defaultDayState();
+          d.learnedModuleIds = (old.learnedModuleIds||[]).map(function(id){
+            // old M1 -> try D1-M1 if day1
+            if(/^M\d$/.test(id)) return "D1-" + id;
+            return id;
+          });
+          d.quizHistory = old.quizHistory || [];
+          d.wrongIds = old.wrongIds || [];
+          d.masterCount = old.masterCount || {};
+          d.masteredIds = old.masteredIds || [];
+          s.days.day1 = d;
+          s.currentCourseId = "day1";
+        }catch(e){}
+      }
+      return s;
     }
+    const s = Object.assign(defaultState(), JSON.parse(raw));
+    if(!s.days) s.days = {};
     return s;
-  }catch(e){
-    return defaultState();
-  }
+  }catch(e){ return defaultState(); }
 }
-
 function saveState(){
   state.lastOpen = new Date().toISOString();
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
 }
-
 let state = loadState();
-if(state.settings?.fontScale === 1.15){
+if(state.settings && state.settings.fontScale === 1.15){
   document.documentElement.style.setProperty("--font","18px");
 }
 
-/* helpers */
-const byId = (arr,id) => arr.find(x=>x.id===id);
-const moduleOf = id => byId(DATA.modules,id);
-const cardsOf = mid => DATA.cards.filter(c=>c.moduleId===mid);
-const qsOf = mid => DATA.questions.filter(q=>q.moduleId===mid);
-const shuffle = a => {
+function courseById(id){ return DATA.courses.find(function(c){ return c.id===id; }); }
+function currentCourse(){
+  let c = courseById(state.currentCourseId);
+  if(!c){ c = DATA.courses[DATA.courses.length-1]; state.currentCourseId = c.id; }
+  return c;
+}
+function dayState(courseId){
+  const id = courseId || state.currentCourseId;
+  if(!state.days[id]) state.days[id] = defaultDayState();
+  const d = state.days[id];
+  if(!d.today || d.today.date !== dayKey()){
+    d.today = { date: dayKey(), learned: false, quizCount: 0, reviewed: false };
+  }
+  return d;
+}
+function byId(arr,id){ return arr.find(function(x){ return x.id===id; }); }
+function moduleOf(course, id){ return byId(course.modules, id); }
+function cardsOf(course, mid){ return course.cards.filter(function(c){ return c.moduleId===mid; }); }
+function qsOf(course, mid){ return course.questions.filter(function(q){ return q.moduleId===mid; }); }
+function shuffle(a){
   const arr = a.slice();
   for(let i=arr.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
+    const t=arr[i]; arr[i]=arr[j]; arr[j]=t;
   }
   return arr;
-};
+}
 function toast(msg){
   const el = document.getElementById("toast");
   el.textContent = msg;
   el.classList.add("show");
-  setTimeout(()=>el.classList.remove("show"),1800);
+  setTimeout(function(){ el.classList.remove("show"); }, 1800);
 }
 function escapeHtml(s){
-  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+  return String(s).replace(/[&<>"']/g, function(m){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m];
+  });
 }
 
-/* stats */
-function accuracy(){
-  const h = state.quizHistory || [];
+function accuracy(ds){
+  const h = ds.quizHistory || [];
   if(!h.length) return null;
-  const ok = h.filter(x=>x.correct).length;
+  const ok = h.filter(function(x){ return x.correct; }).length;
   return Math.round(ok / h.length * 100);
 }
-function moduleMastery(mid){
-  const qs = qsOf(mid);
+function moduleMastery(course, ds, mid){
+  const qs = qsOf(course, mid);
   if(!qs.length) return 0;
-  const related = state.quizHistory.filter(h=>qs.some(q=>q.id===h.qid));
-  if(!related.length) return state.learnedModuleIds.includes(mid) ? 20 : 0;
-  // last attempt per question
+  const related = ds.quizHistory.filter(function(h){
+    return qs.some(function(q){ return q.id===h.qid; });
+  });
+  if(!related.length) return ds.learnedModuleIds.indexOf(mid)>=0 ? 20 : 0;
   const last = {};
-  related.forEach(h=>{ last[h.qid] = h.correct; });
+  related.forEach(function(h){ last[h.qid] = h.correct; });
   const ids = Object.keys(last);
-  const ok = ids.filter(id=>last[id]).length;
+  const ok = ids.filter(function(id){ return last[id]; }).length;
   const rate = ok / qs.length;
-  const learnedBoost = state.learnedModuleIds.includes(mid) ? 0.15 : 0;
-  return Math.min(100, Math.round((rate + learnedBoost) * 100));
+  const boost = ds.learnedModuleIds.indexOf(mid)>=0 ? 0.15 : 0;
+  return Math.min(100, Math.round((rate + boost) * 100));
 }
-function weakModules(){
-  return DATA.modules
-    .map(m=>({id:m.id,title:m.title,score:moduleMastery(m.id)}))
-    .sort((a,b)=>a.score-b.score)
-    .slice(0,2)
-    .filter(x=>x.score<70);
+function courseOverall(course, ds){
+  if(!course.modules.length) return 0;
+  const sum = course.modules.reduce(function(s,m){ return s + moduleMastery(course, ds, m.id); }, 0);
+  return Math.round(sum / course.modules.length);
+}
+function weakModules(course, ds){
+  return course.modules.map(function(m){
+    return {id:m.id, title:m.title, score: moduleMastery(course, ds, m.id)};
+  }).sort(function(a,b){ return a.score-b.score; }).slice(0,2).filter(function(x){ return x.score<70; });
+}
+
+function fillCourseSelect(){
+  const sel = document.getElementById("courseSelect");
+  sel.innerHTML = DATA.courses.map(function(c){
+    return '<option value="'+c.id+'">'+escapeHtml(c.date)+" · "+escapeHtml(c.title)+"</option>";
+  }).join("");
+  sel.value = state.currentCourseId;
+  sel.onchange = function(){
+    state.currentCourseId = sel.value;
+    saveState();
+    refreshAll();
+  };
 }
 
 function refreshHeader(){
-  const learned = state.learnedModuleIds.length;
-  const acc = accuracy();
-  const wrong = state.wrongIds.length;
-  const overall = Math.round(
-    DATA.modules.reduce((s,m)=>s+moduleMastery(m.id),0) / DATA.modules.length
-  );
-  document.getElementById("statLearned").textContent = `${learned}/6`;
-  document.getElementById("statAcc").textContent = acc==null ? "-" : `${acc}%`;
-  document.getElementById("statWrong").textContent = wrong;
-  document.getElementById("homeRing").style.setProperty("--p", `${overall}%`);
-  document.getElementById("homeRingText").textContent = `${overall}%`;
-  // today tasks
-  document.getElementById("taskLearn").classList.toggle("done", !!state.today.learned);
-  document.getElementById("taskQuiz").classList.toggle("done", state.today.quizCount>=8);
-  document.getElementById("taskReview").classList.toggle("done", !!state.today.reviewed);
-  document.getElementById("taskQuizText").textContent = `已练 ${Math.min(state.today.quizCount,8)} / 8`;
+  const course = currentCourse();
+  const ds = dayState();
+  const overall = courseOverall(course, ds);
+  const acc = accuracy(ds);
+  document.getElementById("topSub").textContent = course.subtitle + " · " + course.duration;
+  document.getElementById("statLearned").textContent = ds.learnedModuleIds.length + "/" + course.modules.length;
+  document.getElementById("statAcc").textContent = acc==null ? "-" : (acc+"%");
+  document.getElementById("statWrong").textContent = String(ds.wrongIds.length);
+  document.getElementById("homeRing").style.setProperty("--p", overall+"%");
+  document.getElementById("homeRingText").textContent = overall+"%";
+  document.getElementById("taskLearn").classList.toggle("done", !!ds.today.learned);
+  document.getElementById("taskQuiz").classList.toggle("done", ds.today.quizCount>=8);
+  document.getElementById("taskReview").classList.toggle("done", !!ds.today.reviewed);
+  document.getElementById("taskQuizText").textContent = "已练 " + Math.min(ds.today.quizCount,8) + " / 8";
+  document.getElementById("homeCourseTitle").textContent = course.title;
+  document.getElementById("homeCourseSummary").textContent = course.summary;
+  document.getElementById("homeGoals").innerHTML = (course.goals||[]).map(function(g){
+    return '<span class="chip gray">'+escapeHtml(g)+'</span>';
+  }).join("");
+  document.getElementById("aboutVersion").textContent = "版本 " + DATA.meta.version + " · 共 " + DATA.courses.length + " 天课程";
+
+  // all days progress
+  document.getElementById("allDaysProgress").innerHTML = DATA.courses.map(function(c){
+    const d = dayState(c.id);
+    const p = courseOverall(c, d);
+    const active = c.id===course.id ? " active-day" : "";
+    return '<div class="card day-card'+active+'" data-cid="'+c.id+'" style="margin-bottom:8px;padding:12px">'
+      +'<div style="display:flex;justify-content:space-between;gap:8px"><b>'+escapeHtml(c.title)+'</b>'
+      +'<span class="chip '+(p>=70?'green':(p>0?'orange':'gray'))+'">'+p+'%</span></div>'
+      +'<div class="muted small">'+escapeHtml(c.date)+' · 题量 '+c.questions.length+' · 错题 '+d.wrongIds.length+'</div>'
+      +'<div class="bar"><i style="width:'+p+'%"></i></div></div>';
+  }).join("");
+  document.querySelectorAll("#allDaysProgress [data-cid]").forEach(function(el){
+    el.onclick = function(){
+      state.currentCourseId = el.getAttribute("data-cid");
+      document.getElementById("courseSelect").value = state.currentCourseId;
+      saveState();
+      refreshAll();
+      toast("已切换课程日");
+    };
+  });
+
+  // quote
+  const qs = course.quotes || [];
+  if(qs.length){
+    const q = qs[ds.quoteIndex % qs.length];
+    document.getElementById("homeQuote").textContent = q.text;
+  }else{
+    document.getElementById("homeQuote").textContent = "先学再练，答错就回看。";
+  }
+
   // weak
-  const weak = weakModules();
+  const weak = weakModules(course, ds);
   const box = document.getElementById("weakBox");
-  if(!state.quizHistory.length){
+  if(!ds.quizHistory.length){
     box.innerHTML = "先做几道题，我会帮你找出薄弱模块。";
   }else if(!weak.length){
-    box.innerHTML = "<span class='chip green'>状态不错</span> 暂无明显薄弱模块，去综合测巩固吧。";
+    box.innerHTML = "<span class='chip green'>状态不错</span> 暂无明显薄弱模块，去综合练巩固吧。";
   }else{
-    box.innerHTML = weak.map(w=>`<div style="margin:6px 0"><span class="chip orange">${escapeHtml(w.title)}</span> 掌握度约 ${w.score}% <button class="btn soft" style="margin-left:6px;padding:6px 10px;min-height:36px" data-weak="${w.id}">去学</button></div>`).join("");
-    box.querySelectorAll("[data-weak]").forEach(btn=>{
-      btn.onclick = ()=>{ openModule(btn.dataset.weak); switchTab("learn"); };
+    box.innerHTML = weak.map(function(w){
+      return '<div style="margin:6px 0"><span class="chip orange">'+escapeHtml(w.title)+'</span> 掌握度约 '+w.score
+        +'% <button class="btn soft" style="margin-left:6px;padding:6px 10px;min-height:36px" data-weak="'+w.id+'">去学</button></div>';
+    }).join("");
+    box.querySelectorAll("[data-weak]").forEach(function(btn){
+      btn.onclick = function(){ openModule(btn.getAttribute("data-weak")); switchTab("learn"); };
     });
   }
-  // quote
-  const q = DATA.quotes[state.quoteIndex % DATA.quotes.length];
-  document.getElementById("homeQuote").textContent = q.text;
 }
 
-/* tabs */
 function switchTab(name){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(`page-${name}`).classList.add("active");
-  document.querySelectorAll("#bottomNav button").forEach(b=>{
-    b.classList.toggle("active", b.dataset.tab===name);
+  document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+  document.getElementById("page-"+name).classList.add("active");
+  document.querySelectorAll("#bottomNav button").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-tab")===name);
   });
   if(name==="learn") renderLearnList();
   if(name==="quiz") renderQuizSetup();
   if(name==="review") renderWrongList();
   if(name==="me") renderMe();
   if(name==="home") refreshHeader();
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.scrollTo({top:0, behavior:"smooth"});
 }
-document.querySelectorAll("#bottomNav button").forEach(btn=>{
-  btn.addEventListener("click",()=>switchTab(btn.dataset.tab));
+document.querySelectorAll("#bottomNav button").forEach(function(btn){
+  btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
 });
 
-/* LEARN */
 function renderLearnList(){
+  const course = currentCourse();
+  const ds = dayState();
   const list = document.getElementById("learnList");
   const detail = document.getElementById("learnDetail");
   detail.classList.add("hidden");
   list.classList.remove("hidden");
-  list.innerHTML = DATA.modules.map(m=>{
-    const mastered = moduleMastery(m.id);
-    const learned = state.learnedModuleIds.includes(m.id);
-    return `<div class="card mod" data-mid="${m.id}">
-      <div class="dot" style="background:${m.color}"></div>
-      <div class="meta">
-        <div class="title">${escapeHtml(m.title)} ${learned?'<span class="chip green">已学</span>':''}</div>
-        <div class="muted small">${escapeHtml(m.timeRange)} · ${escapeHtml(m.chapterRef)}</div>
-        <div class="muted" style="margin-top:6px">${escapeHtml(m.summary)}</div>
-        <div class="bar"><i style="width:${mastered}%;background:${m.color}"></i></div>
-        <div class="muted small" style="margin-top:4px">掌握度 ${mastered}%</div>
-      </div>
-    </div>`;
-  }).join("");
-  list.querySelectorAll("[data-mid]").forEach(el=>{
-    el.onclick = ()=>openModule(el.dataset.mid);
+  list.innerHTML = '<div class="card"><div class="kicker">'+escapeHtml(course.date)+'</div><h3>'+escapeHtml(course.title)+'</h3><p class="muted">'+escapeHtml(course.summary)+'</p></div>'
+    + course.modules.map(function(m){
+      const mastered = moduleMastery(course, ds, m.id);
+      const learned = ds.learnedModuleIds.indexOf(m.id)>=0;
+      return '<div class="card mod" data-mid="'+m.id+'">'
+        +'<div class="dot" style="background:'+m.color+'"></div>'
+        +'<div class="meta"><div class="title">'+escapeHtml(m.title)+(learned?' <span class="chip green">已学</span>':'')+'</div>'
+        +'<div class="muted small">'+escapeHtml(m.timeRange)+' · '+escapeHtml(m.chapterRef)+'</div>'
+        +'<div class="muted" style="margin-top:6px">'+escapeHtml(m.summary)+'</div>'
+        +'<div class="bar"><i style="width:'+mastered+'%;background:'+m.color+'"></i></div>'
+        +'<div class="muted small" style="margin-top:4px">掌握度 '+mastered+'%</div></div></div>';
+    }).join("");
+  list.querySelectorAll("[data-mid]").forEach(function(el){
+    el.onclick = function(){ openModule(el.getAttribute("data-mid")); };
   });
 }
 
 function openModule(mid){
-  const m = moduleOf(mid);
+  const course = currentCourse();
+  const m = moduleOf(course, mid);
   if(!m) return;
-  state.lastModuleId = mid;
+  const ds = dayState();
+  ds.lastModuleId = mid;
   saveState();
   const list = document.getElementById("learnList");
   const detail = document.getElementById("learnDetail");
   list.classList.add("hidden");
   detail.classList.remove("hidden");
-  const cards = cardsOf(mid);
-  const quotes = DATA.quotes.filter(q=>q.moduleId===mid);
-  detail.innerHTML = `
-    <button class="back-btn" id="backLearn">← 返回模块列表</button>
-    <div class="card">
-      <div class="kicker">${escapeHtml(m.timeRange)} · ${escapeHtml(m.chapterRef)}</div>
-      <h2>${escapeHtml(m.title)}</h2>
-      <p>${escapeHtml(m.summary)}</p>
-      <div class="tag-row">${m.goals.map(g=>`<span class="chip gray">${escapeHtml(g)}</span>`).join("")}</div>
-      <div class="row" style="margin-top:10px">
-        <button class="btn" id="markLearned">标记已学</button>
-        <button class="btn soft" id="quizThis">本模块测验</button>
-      </div>
-    </div>
-    <div class="card">
-      <h3>2 分钟速览</h3>
-      <ul style="margin:0;padding-left:18px" class="muted">
-        ${cards.slice(0,5).map(c=>`<li style="margin:6px 0"><b style="color:var(--text)">${escapeHtml(c.title)}</b> — ${escapeHtml(c.body.slice(0,42))}…</li>`).join("")}
-      </ul>
-    </div>
-    ${quotes.map(q=>`<div class="quote">${escapeHtml(q.text)}</div>`).join("")}
-    ${cards.map(c=>renderCard(c)).join("")}
-  `;
+  const cards = cardsOf(course, mid);
+  const quotes = course.quotes.filter(function(q){ return q.moduleId===mid; });
+  detail.innerHTML = '<button class="back-btn" id="backLearn">← 返回模块列表</button>'
+    +'<div class="card"><div class="kicker">'+escapeHtml(m.timeRange)+' · '+escapeHtml(m.chapterRef)+'</div>'
+    +'<h2>'+escapeHtml(m.title)+'</h2><p>'+escapeHtml(m.summary)+'</p>'
+    +'<div class="tag-row">'+(m.goals||[]).map(function(g){ return '<span class="chip gray">'+escapeHtml(g)+'</span>'; }).join("")+'</div>'
+    +'<div class="row" style="margin-top:10px"><button class="btn" id="markLearned">标记已学</button>'
+    +'<button class="btn soft" id="quizThis">本模块测验</button></div></div>'
+    +'<div class="card"><h3>2 分钟速览</h3><ul style="margin:0;padding-left:18px" class="muted">'
+    + cards.slice(0,5).map(function(c){
+        return '<li style="margin:6px 0"><b style="color:var(--text)">'+escapeHtml(c.title)+'</b> — '+escapeHtml(c.body.slice(0,42))+'…</li>';
+      }).join("")
+    +'</ul></div>'
+    + quotes.map(function(q){ return '<div class="quote">'+escapeHtml(q.text)+'</div>'; }).join("")
+    + cards.map(renderCard).join("");
   document.getElementById("backLearn").onclick = renderLearnList;
-  document.getElementById("markLearned").onclick = ()=>{
-    if(!state.learnedModuleIds.includes(mid)){
-      state.learnedModuleIds.push(mid);
-      state.today.learned = true;
+  document.getElementById("markLearned").onclick = function(){
+    if(ds.learnedModuleIds.indexOf(mid)<0){
+      ds.learnedModuleIds.push(mid);
+      ds.today.learned = true;
       saveState();
       toast("已标记为已学");
       refreshHeader();
       openModule(mid);
     }else toast("该模块已标记");
   };
-  document.getElementById("quizThis").onclick = ()=>{
+  document.getElementById("quizThis").onclick = function(){
     quizMode = "module";
     quizModuleId = mid;
     startQuiz();
@@ -561,72 +529,71 @@ function openModule(mid){
 }
 
 function renderCard(c){
-  return `<div class="card" id="card-${c.id}">
-    <div class="kicker">${c.type}</div>
-    <h3>${escapeHtml(c.title)}</h3>
-    <p>${escapeHtml(c.body)}</p>
-    <details class="fold">
-      <summary>课堂原话 vs 更严谨表述</summary>
-      <div class="body">
-        <p><b>课堂原话：</b>${escapeHtml(c.classroomQuote||"—")}</p>
-        <p><b>更严谨：</b>${escapeHtml(c.rigorousNote||"—")}</p>
-      </div>
-    </details>
-  </div>`;
+  return '<div class="card" id="card-'+c.id+'"><div class="kicker">'+escapeHtml(c.type)+'</div>'
+    +'<h3>'+escapeHtml(c.title)+'</h3><p>'+escapeHtml(c.body)+'</p>'
+    +'<details class="fold"><summary>课堂原话 vs 更严谨表述</summary><div class="body">'
+    +'<p><b>课堂原话：</b>'+escapeHtml(c.classroomQuote||"—")+'</p>'
+    +'<p><b>更严谨：</b>'+escapeHtml(c.rigorousNote||"—")+'</p></div></details></div>';
 }
 
-/* QUIZ */
 let quizMode = "module";
-let quizModuleId = "M1";
+let quizModuleId = null;
 let quizQueue = [];
 let quizIndex = 0;
 let quizCorrect = 0;
 let quizAnswered = false;
 
 function renderQuizSetup(){
+  const course = currentCourse();
   document.getElementById("quizSetup").classList.remove("hidden");
   document.getElementById("quizPlay").classList.add("hidden");
   document.getElementById("quizResult").classList.add("hidden");
+  document.getElementById("quizCourseHint").textContent = "当前课程：" + course.title + "（" + course.questions.length + " 题）";
+  if(!quizModuleId) quizModuleId = course.modules[0].id;
   const pick = document.getElementById("modulePick");
-  pick.innerHTML = `<div class="muted small" style="margin-bottom:6px">模块测请选择：</div>` +
-    DATA.modules.map(m=>`<label class="option" style="display:flex;align-items:center;gap:8px;padding:10px 12px">
-      <input type="radio" name="mid" value="${m.id}" ${m.id===quizModuleId?"checked":""}/> <span><b>${escapeHtml(m.title)}</b> <span class="muted small">(${qsOf(m.id).length}题)</span></span>
-    </label>`).join("");
-  document.querySelectorAll("#quizModeSeg button").forEach(b=>{
-    b.classList.toggle("active", b.dataset.mode===quizMode);
-    b.onclick = ()=>{
-      quizMode = b.dataset.mode;
-      document.querySelectorAll("#quizModeSeg button").forEach(x=>x.classList.toggle("active", x.dataset.mode===quizMode));
+  pick.innerHTML = '<div class="muted small" style="margin-bottom:6px">模块测请选择：</div>'
+    + course.modules.map(function(m){
+        const checked = m.id===quizModuleId ? " checked" : "";
+        return '<label class="option" style="display:flex;align-items:center;gap:8px;padding:10px 12px">'
+          +'<input type="radio" name="mid" value="'+m.id+'"'+checked+'/> <span><b>'+escapeHtml(m.title)
+          +'</b> <span class="muted small">('+qsOf(course,m.id).length+'题)</span></span></label>';
+      }).join("");
+  document.querySelectorAll("#quizModeSeg button").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-mode")===quizMode);
+    b.onclick = function(){
+      quizMode = b.getAttribute("data-mode");
+      document.querySelectorAll("#quizModeSeg button").forEach(function(x){
+        x.classList.toggle("active", x.getAttribute("data-mode")===quizMode);
+      });
       pick.style.display = quizMode==="module" ? "block" : "none";
     };
   });
   pick.style.display = quizMode==="module" ? "block" : "none";
 }
 
-document.getElementById("btnBeginQuiz").onclick = ()=>{
+document.getElementById("btnBeginQuiz").onclick = function(){
   const checked = document.querySelector('input[name="mid"]:checked');
   if(checked) quizModuleId = checked.value;
   startQuiz();
 };
 
 function buildQueue(){
-  if(quizMode==="module"){
-    return shuffle(qsOf(quizModuleId));
-  }
+  const course = currentCourse();
+  const ds = dayState();
+  if(quizMode==="module") return shuffle(qsOf(course, quizModuleId));
   if(quizMode==="wrong"){
-    const ids = state.wrongIds.filter(id=>!state.masteredIds.includes(id));
-    const arr = ids.map(id=>byId(DATA.questions,id)).filter(Boolean);
+    const arr = ds.wrongIds.map(function(id){ return byId(course.questions, id); }).filter(Boolean);
     return shuffle(arr);
   }
-  // mix: 12, at least 1 per module if possible
+  // mix: up to 12, at least 1 per module
   const picks = [];
-  DATA.modules.forEach(m=>{
-    const pool = shuffle(qsOf(m.id));
+  course.modules.forEach(function(m){
+    const pool = shuffle(qsOf(course, m.id));
     if(pool[0]) picks.push(pool[0]);
   });
-  const rest = shuffle(DATA.questions.filter(q=>!picks.includes(q)));
+  const rest = shuffle(course.questions.filter(function(q){ return picks.indexOf(q)<0; }));
   while(picks.length<12 && rest.length) picks.push(rest.pop());
-  return shuffle(picks).slice(0,12);
+  return shuffle(picks).slice(0, Math.min(12, picks.length));
 }
 
 function startQuiz(){
@@ -636,9 +603,7 @@ function startQuiz(){
     renderQuizSetup();
     return;
   }
-  quizIndex = 0;
-  quizCorrect = 0;
-  quizAnswered = false;
+  quizIndex = 0; quizCorrect = 0; quizAnswered = false;
   document.getElementById("quizSetup").classList.add("hidden");
   document.getElementById("quizResult").classList.add("hidden");
   document.getElementById("quizPlay").classList.remove("hidden");
@@ -646,55 +611,55 @@ function startQuiz(){
 }
 
 function renderQuestion(){
+  const course = currentCourse();
   const q = quizQueue[quizIndex];
   const play = document.getElementById("quizPlay");
   quizAnswered = false;
-  const m = moduleOf(q.moduleId);
-  play.innerHTML = `
-    <div class="card">
-      <div class="quiz-progress">第 ${quizIndex+1} / ${quizQueue.length} 题 · ${escapeHtml(m.title)} · ${q.type==="judge"?"判断题":"选择题"}</div>
-      <h3 style="font-size:17px;line-height:1.45">${escapeHtml(q.stem)}</h3>
-      <div id="optBox" style="margin-top:12px">
-        ${q.options.map(o=>`<button class="option" data-key="${o.key}">${escapeHtml(o.key==="true"||o.key==="false"?o.text:`${o.key}. ${o.text}`)}</button>`).join("")}
-      </div>
-      <div id="quizFeedback" class="hidden" style="margin-top:8px"></div>
-      <button class="btn block hidden" id="btnNextQ" style="margin-top:10px">下一题</button>
-    </div>`;
-  play.querySelectorAll(".option").forEach(btn=>{
-    btn.onclick = ()=>answerQuestion(btn.dataset.key, btn);
+  const m = moduleOf(course, q.moduleId);
+  play.innerHTML = '<div class="card"><div class="quiz-progress">第 '+(quizIndex+1)+' / '+quizQueue.length
+    +' 题 · '+escapeHtml(m.title)+' · '+(q.type==="judge"?"判断题":"选择题")+'</div>'
+    +'<h3 style="font-size:17px;line-height:1.45">'+escapeHtml(q.stem)+'</h3>'
+    +'<div id="optBox" style="margin-top:12px">'
+    + q.options.map(function(o){
+        const label = (o.key==="true"||o.key==="false") ? o.text : (o.key+". "+o.text);
+        return '<button class="option" data-key="'+o.key+'">'+escapeHtml(label)+'</button>';
+      }).join("")
+    +'</div><div id="quizFeedback" class="hidden" style="margin-top:8px"></div>'
+    +'<button class="btn block hidden" id="btnNextQ" style="margin-top:10px">下一题</button></div>';
+  play.querySelectorAll(".option").forEach(function(btn){
+    btn.onclick = function(){ answerQuestion(btn.getAttribute("data-key"), btn); };
   });
 }
 
 function answerQuestion(key, btnEl){
   if(quizAnswered) return;
   quizAnswered = true;
+  const course = currentCourse();
+  const ds = dayState();
   const q = quizQueue[quizIndex];
   const correct = String(q.answer) === String(key);
-  const opts = document.querySelectorAll("#optBox .option");
-  opts.forEach(o=>{
+  document.querySelectorAll("#optBox .option").forEach(function(o){
     o.disabled = true;
-    if(String(o.dataset.key)===String(q.answer)) o.classList.add("correct");
+    if(String(o.getAttribute("data-key"))===String(q.answer)) o.classList.add("correct");
     if(o===btnEl && !correct) o.classList.add("wrong");
     if(o===btnEl) o.classList.add("selected");
   });
-
-  state.quizHistory.push({qid:q.id, correct, ts:Date.now()});
-  state.today.quizCount += 1;
+  ds.quizHistory.push({qid:q.id, correct:correct, ts:Date.now()});
+  ds.today.quizCount += 1;
   if(correct){
     quizCorrect += 1;
-    // mastery for wrongbook
-    if(state.wrongIds.includes(q.id)){
-      state.masterCount[q.id] = (state.masterCount[q.id]||0) + 1;
-      if(state.masterCount[q.id] >= 2){
-        state.wrongIds = state.wrongIds.filter(id=>id!==q.id);
-        if(!state.masteredIds.includes(q.id)) state.masteredIds.push(q.id);
-        delete state.masterCount[q.id];
+    if(ds.wrongIds.indexOf(q.id)>=0){
+      ds.masterCount[q.id] = (ds.masterCount[q.id]||0) + 1;
+      if(ds.masterCount[q.id] >= 2){
+        ds.wrongIds = ds.wrongIds.filter(function(id){ return id!==q.id; });
+        if(ds.masteredIds.indexOf(q.id)<0) ds.masteredIds.push(q.id);
+        delete ds.masterCount[q.id];
         toast("连续答对，已移出错题本");
       }
     }
   }else{
-    if(!state.wrongIds.includes(q.id)) state.wrongIds.push(q.id);
-    state.masterCount[q.id] = 0;
+    if(ds.wrongIds.indexOf(q.id)<0) ds.wrongIds.push(q.id);
+    ds.masterCount[q.id] = 0;
   }
   saveState();
   refreshHeader();
@@ -702,27 +667,22 @@ function answerQuestion(key, btnEl){
   const fb = document.getElementById("quizFeedback");
   fb.classList.remove("hidden");
   if(correct){
-    fb.innerHTML = `<div class="chip green">回答正确</div><p class="muted" style="margin:8px 0 0">${escapeHtml(q.explain)}</p>`;
+    fb.innerHTML = '<div class="chip green">回答正确</div><p class="muted" style="margin:8px 0 0">'+escapeHtml(q.explain)+'</p>';
     document.getElementById("btnNextQ").classList.remove("hidden");
   }else{
-    fb.innerHTML = `<div class="chip orange">回答错误</div>
-      <p style="margin:8px 0">${escapeHtml(q.wrongHint||"")}</p>
-      <button class="btn block" id="btnOpenReview">查看课堂相关 · 温习昨日内容</button>
-      <button class="btn ghost block" id="btnSkipReview" style="margin-top:8px">先看解析继续</button>`;
-    document.getElementById("btnOpenReview").onclick = ()=>openReviewSheet(q, true);
-    document.getElementById("btnSkipReview").onclick = ()=>openReviewSheet(q, false);
+    fb.innerHTML = '<div class="chip orange">回答错误</div><p style="margin:8px 0">'+escapeHtml(q.wrongHint||"")+'</p>'
+      +'<button class="btn block" id="btnOpenReview">查看课堂相关 · 温习昨日内容</button>'
+      +'<button class="btn ghost block" id="btnSkipReview" style="margin-top:8px">先看解析继续</button>';
+    document.getElementById("btnOpenReview").onclick = function(){ openReviewSheet(q, true); };
+    document.getElementById("btnSkipReview").onclick = function(){ openReviewSheet(q, false); };
   }
   document.getElementById("btnNextQ").onclick = nextQuestion;
 }
 
 function nextQuestion(){
   closeSheet();
-  if(quizIndex >= quizQueue.length-1){
-    showQuizResult();
-  }else{
-    quizIndex += 1;
-    renderQuestion();
-  }
+  if(quizIndex >= quizQueue.length-1) showQuizResult();
+  else { quizIndex += 1; renderQuestion(); }
 }
 
 function showQuizResult(){
@@ -731,111 +691,102 @@ function showQuizResult(){
   res.classList.remove("hidden");
   const total = quizQueue.length;
   const rate = Math.round(quizCorrect/total*100);
-  res.innerHTML = `<div class="card">
-    <div class="kicker">本轮结束</div>
-    <div class="result-big">${quizCorrect}/${total}</div>
-    <p style="text-align:center">正确率 ${rate}%</p>
-    <p class="muted" style="text-align:center">${rate>=80?"很棒，继续保持！":rate>=60?"还可以，建议回看错题。":"先去学模块，再回来练。"}</p>
-    <button class="btn block" id="btnAgain">再来一轮</button>
-    <button class="btn ghost block" style="margin-top:8px" id="btnToWrong">去错题本</button>
-    <button class="btn soft block" style="margin-top:8px" id="btnToLearn2">去学习</button>
-  </div>`;
-  document.getElementById("btnAgain").onclick = ()=>{ renderQuizSetup(); };
-  document.getElementById("btnToWrong").onclick = ()=>switchTab("review");
-  document.getElementById("btnToLearn2").onclick = ()=>switchTab("learn");
+  res.innerHTML = '<div class="card"><div class="kicker">本轮结束</div><div class="result-big">'+quizCorrect+'/'+total+'</div>'
+    +'<p style="text-align:center">正确率 '+rate+'%</p>'
+    +'<p class="muted" style="text-align:center">'+(rate>=80?"很棒，继续保持！":(rate>=60?"还可以，建议回看错题。":"先去学模块，再回来练。"))+'</p>'
+    +'<button class="btn block" id="btnAgain">再来一轮</button>'
+    +'<button class="btn ghost block" style="margin-top:8px" id="btnToWrong">去错题本</button>'
+    +'<button class="btn soft block" style="margin-top:8px" id="btnToLearn2">去学习</button></div>';
+  document.getElementById("btnAgain").onclick = function(){ renderQuizSetup(); };
+  document.getElementById("btnToWrong").onclick = function(){ switchTab("review"); };
+  document.getElementById("btnToLearn2").onclick = function(){ switchTab("learn"); };
 }
 
-/* REVIEW SHEET */
 function openReviewSheet(q, full){
-  state.today.reviewed = true;
+  const course = currentCourse();
+  const ds = dayState();
+  ds.today.reviewed = true;
   saveState();
   refreshHeader();
-  const cards = (q.review?.cardIds||[]).map(id=>byId(DATA.cards,id)).filter(Boolean);
-  const quotes = (q.review?.quoteIds||[]).map(id=>byId(DATA.quotes,id)).filter(Boolean);
-  const anchors = (q.review?.anchorIds||[]).map(id=>byId(DATA.anchors,id)).filter(Boolean);
-  const m = moduleOf(q.moduleId);
+  const cards = (q.review && q.review.cardIds || []).map(function(id){ return byId(course.cards,id); }).filter(Boolean);
+  const quotes = (q.review && q.review.quoteIds || []).map(function(id){ return byId(course.quotes,id); }).filter(Boolean);
+  const anchors = (q.review && q.review.anchorIds || []).map(function(id){ return byId(course.anchors,id); }).filter(Boolean);
+  const m = moduleOf(course, q.moduleId);
   const body = document.getElementById("sheetBody");
-  body.innerHTML = `
-    <div class="handle"></div>
-    <div class="kicker">答错回看 · ${escapeHtml(m.title)}</div>
-    <h3 style="margin:0 0 8px">本题解析</h3>
-    <p>${escapeHtml(q.explain)}</p>
-    ${full?"":""}
-    ${quotes.map(qt=>`<div class="quote">${escapeHtml(qt.text)}</div>`).join("")}
-    ${cards.map(c=>`
-      <div class="card" style="box-shadow:none;margin:10px 0">
-        <h3 style="font-size:15px">${escapeHtml(c.title)}</h3>
-        <p class="small">${escapeHtml(c.body)}</p>
-        <details class="fold"><summary>课堂原话 vs 更严谨</summary>
-          <div class="body"><p><b>原话：</b>${escapeHtml(c.classroomQuote||"")}</p>
-          <p><b>严谨：</b>${escapeHtml(c.rigorousNote||"")}</p></div>
-        </details>
-      </div>`).join("")}
-    ${anchors.map(a=>`
-      <div class="anchor-box">
-        <div><b>课堂定位</b> ${escapeHtml(a.timeCode)} · ${escapeHtml(a.chapter)}</div>
-        <div style="margin-top:4px">${escapeHtml(a.label)}</div>
-        <div class="muted" style="margin-top:6px">「${escapeHtml(a.transcriptHint)}」</div>
-      </div>`).join("")}
-    <div class="row" style="margin-top:14px">
-      <button class="btn" id="sheetNext">继续答题</button>
-      <button class="btn soft" id="sheetLearn">去学该模块</button>
-    </div>
-  `;
+  body.innerHTML = '<div class="handle"></div><div class="kicker">答错回看 · '+escapeHtml(m.title)+'</div>'
+    +'<h3 style="margin:0 0 8px">本题解析</h3><p>'+escapeHtml(q.explain)+'</p>'
+    + quotes.map(function(qt){ return '<div class="quote">'+escapeHtml(qt.text)+'</div>'; }).join("")
+    + cards.map(function(c){
+        return '<div class="card" style="box-shadow:none;margin:10px 0"><h3 style="font-size:15px">'+escapeHtml(c.title)+'</h3>'
+          +'<p class="small">'+escapeHtml(c.body)+'</p>'
+          +'<details class="fold"><summary>课堂原话 vs 更严谨</summary><div class="body">'
+          +'<p><b>原话：</b>'+escapeHtml(c.classroomQuote||"")+'</p>'
+          +'<p><b>严谨：</b>'+escapeHtml(c.rigorousNote||"")+'</p></div></details></div>';
+      }).join("")
+    + anchors.map(function(a){
+        return '<div class="anchor-box"><div><b>课堂定位</b> '+escapeHtml(a.timeCode)+' · '+escapeHtml(a.chapter)+'</div>'
+          +'<div style="margin-top:4px">'+escapeHtml(a.label)+'</div>'
+          +'<div class="muted" style="margin-top:6px">「'+escapeHtml(a.transcriptHint)+'」</div></div>';
+      }).join("")
+    +'<div class="row" style="margin-top:14px"><button class="btn" id="sheetNext">继续答题</button>'
+    +'<button class="btn soft" id="sheetLearn">去学该模块</button></div>';
   document.getElementById("sheetMask").classList.add("show");
-  document.getElementById("sheetNext").onclick = ()=>{ closeSheet(); document.getElementById("btnNextQ")?.classList.remove("hidden"); nextQuestion(); };
-  document.getElementById("sheetLearn").onclick = ()=>{ closeSheet(); openModule(q.moduleId); switchTab("learn"); };
-  // if partial, still show next
+  document.getElementById("sheetNext").onclick = function(){
+    closeSheet();
+    const n = document.getElementById("btnNextQ");
+    if(n) n.classList.remove("hidden");
+    nextQuestion();
+  };
+  document.getElementById("sheetLearn").onclick = function(){
+    closeSheet();
+    openModule(q.moduleId);
+    switchTab("learn");
+  };
   if(!full){
-    document.getElementById("btnNextQ")?.classList.remove("hidden");
+    const n = document.getElementById("btnNextQ");
+    if(n) n.classList.remove("hidden");
   }
 }
-
-function closeSheet(){
-  document.getElementById("sheetMask").classList.remove("show");
-}
-document.getElementById("sheetMask").addEventListener("click", e=>{
+function closeSheet(){ document.getElementById("sheetMask").classList.remove("show"); }
+document.getElementById("sheetMask").addEventListener("click", function(e){
   if(e.target.id==="sheetMask") closeSheet();
 });
 
-/* WRONG LIST */
 function renderWrongList(){
+  const course = currentCourse();
+  const ds = dayState();
   const box = document.getElementById("wrongList");
-  const ids = state.wrongIds.filter(id=>!state.masteredIds.includes(id));
+  const ids = ds.wrongIds.filter(function(id){ return ds.masteredIds.indexOf(id)<0; });
   if(!ids.length){
-    box.innerHTML = `<div class="empty">暂无错题<br/><span class="small">答错后会自动收集，并可回看昨日课堂片段</span></div>`;
+    box.innerHTML = '<div class="empty">暂无错题<br/><span class="small">答错后会自动收集，并可回看课堂片段</span></div>';
     return;
   }
-  box.innerHTML = ids.map(id=>{
-    const q = byId(DATA.questions,id);
+  box.innerHTML = ids.map(function(id){
+    const q = byId(course.questions, id);
     if(!q) return "";
-    const m = moduleOf(q.moduleId);
-    const mc = state.masterCount[id]||0;
-    return `<div class="list-item">
-      <div class="chip gray">${escapeHtml(m.title)}</div>
-      <div style="margin-top:6px;font-weight:600">${escapeHtml(q.stem)}</div>
-      <div class="muted small" style="margin-top:4px">连续答对进度 ${mc}/2 · ${q.type==="judge"?"判断":"选择"}</div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn soft" data-review="${q.id}">回看课堂</button>
-        <button class="btn" data-retry="${q.id}">再练此题</button>
-        <button class="btn ghost" data-master="${q.id}">标记掌握</button>
-      </div>
-    </div>`;
+    const m = moduleOf(course, q.moduleId);
+    const mc = ds.masterCount[id]||0;
+    return '<div class="list-item"><div class="chip gray">'+escapeHtml(m.title)+'</div>'
+      +'<div style="margin-top:6px;font-weight:600">'+escapeHtml(q.stem)+'</div>'
+      +'<div class="muted small" style="margin-top:4px">连续答对进度 '+mc+'/2 · '+(q.type==="judge"?"判断":"选择")+'</div>'
+      +'<div class="row" style="margin-top:8px">'
+      +'<button class="btn soft" data-review="'+q.id+'">回看课堂</button>'
+      +'<button class="btn" data-retry="'+q.id+'">再练此题</button>'
+      +'<button class="btn ghost" data-master="'+q.id+'">标记掌握</button></div></div>';
   }).join("");
-  box.querySelectorAll("[data-review]").forEach(b=>{
-    b.onclick = ()=>{
-      const q = byId(DATA.questions, b.dataset.review);
+  box.querySelectorAll("[data-review]").forEach(function(b){
+    b.onclick = function(){
+      const q = byId(course.questions, b.getAttribute("data-review"));
       openReviewSheet(q, true);
-      // override next buttons for review context
-      setTimeout(()=>{
+      setTimeout(function(){
         const n = document.getElementById("sheetNext");
         if(n){ n.textContent = "关闭"; n.onclick = closeSheet; }
       },0);
     };
   });
-  box.querySelectorAll("[data-retry]").forEach(b=>{
-    b.onclick = ()=>{
-      const q = byId(DATA.questions, b.dataset.retry);
+  box.querySelectorAll("[data-retry]").forEach(function(b){
+    b.onclick = function(){
+      const q = byId(course.questions, b.getAttribute("data-retry"));
       quizMode = "wrong";
       quizQueue = [q];
       quizIndex = 0; quizCorrect = 0; quizAnswered = false;
@@ -846,12 +797,13 @@ function renderWrongList(){
       renderQuestion();
     };
   });
-  box.querySelectorAll("[data-master]").forEach(b=>{
-    b.onclick = ()=>{
-      const id = b.dataset.master;
-      state.wrongIds = state.wrongIds.filter(x=>x!==id);
-      if(!state.masteredIds.includes(id)) state.masteredIds.push(id);
-      delete state.masterCount[id];
+  box.querySelectorAll("[data-master]").forEach(function(b){
+    b.onclick = function(){
+      const id = b.getAttribute("data-master");
+      const ds2 = dayState();
+      ds2.wrongIds = ds2.wrongIds.filter(function(x){ return x!==id; });
+      if(ds2.masteredIds.indexOf(id)<0) ds2.masteredIds.push(id);
+      delete ds2.masterCount[id];
       saveState();
       toast("已标记掌握");
       renderWrongList();
@@ -860,64 +812,94 @@ function renderWrongList(){
   });
 }
 
-/* ME */
 function renderMe(){
-  const acc = accuracy();
-  document.getElementById("meStats").innerHTML = `
-    <p>累计作答：<b>${state.quizHistory.length}</b> 次</p>
-    <p>正确率：<b>${acc==null?"-":acc+"%"}</b></p>
-    <p>已学模块：<b>${state.learnedModuleIds.length}/6</b></p>
-    <p>错题：<b>${state.wrongIds.length}</b> · 已掌握移出：<b>${state.masteredIds.length}</b></p>
-  `;
-  document.getElementById("meModules").innerHTML = DATA.modules.map(m=>{
-    const s = moduleMastery(m.id);
-    return `<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between"><b>${escapeHtml(m.title)}</b><span class="muted small">${s}%</span></div>
-      <div class="bar"><i style="width:${s}%;background:${m.color}"></i></div>
-    </div>`;
+  const course = currentCourse();
+  const ds = dayState();
+  const acc = accuracy(ds);
+  document.getElementById("meStats").innerHTML =
+    "<p>当前课程：<b>"+escapeHtml(course.title)+"</b></p>"
+    +"<p>累计作答：<b>"+ds.quizHistory.length+"</b> 次</p>"
+    +"<p>正确率：<b>"+(acc==null?"-":acc+"%")+"</b></p>"
+    +"<p>已学模块：<b>"+ds.learnedModuleIds.length+"/"+course.modules.length+"</b></p>"
+    +"<p>错题：<b>"+ds.wrongIds.length+"</b> · 已掌握移出：<b>"+ds.masteredIds.length+"</b></p>";
+  document.getElementById("meModules").innerHTML = course.modules.map(function(m){
+    const s = moduleMastery(course, ds, m.id);
+    return '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between"><b>'
+      +escapeHtml(m.title)+'</b><span class="muted small">'+s+'%</span></div>'
+      +'<div class="bar"><i style="width:'+s+'%;background:'+m.color+'"></i></div></div>';
+  }).join("");
+  document.getElementById("meAllDays").innerHTML = DATA.courses.map(function(c){
+    const d = dayState(c.id);
+    const p = courseOverall(c, d);
+    return '<div class="list-item"><b>'+escapeHtml(c.title)+'</b> <span class="chip blue">'+p+'%</span>'
+      +'<div class="muted small">'+escapeHtml(c.date)+' · 练 '+d.quizHistory.length+' · 错 '+d.wrongIds.length+'</div></div>';
   }).join("");
 }
 
-/* home buttons */
-document.getElementById("btnContinueLearn").onclick = ()=>{
-  const next = DATA.modules.find(m=>!state.learnedModuleIds.includes(m.id)) || moduleOf(state.lastModuleId);
+function refreshAll(){
+  fillCourseSelect();
+  refreshHeader();
+  const active = document.querySelector(".page.active");
+  if(active && active.id==="page-learn") renderLearnList();
+  if(active && active.id==="page-quiz") renderQuizSetup();
+  if(active && active.id==="page-review") renderWrongList();
+  if(active && active.id==="page-me") renderMe();
+}
+
+document.getElementById("btnContinueLearn").onclick = function(){
+  const course = currentCourse();
+  const ds = dayState();
+  const next = course.modules.find(function(m){ return ds.learnedModuleIds.indexOf(m.id)<0; })
+    || moduleOf(course, ds.lastModuleId) || course.modules[0];
   openModule(next.id);
   switchTab("learn");
 };
-document.getElementById("btnStartQuiz").onclick = ()=>{
+document.getElementById("btnStartQuiz").onclick = function(){
   quizMode = "mix";
   switchTab("quiz");
-  // auto highlight mix
-  document.querySelectorAll("#quizModeSeg button").forEach(b=>b.classList.toggle("active", b.dataset.mode==="mix"));
+  document.querySelectorAll("#quizModeSeg button").forEach(function(b){
+    b.classList.toggle("active", b.getAttribute("data-mode")==="mix");
+  });
   document.getElementById("modulePick").style.display = "none";
 };
-document.getElementById("btnOpenWrong").onclick = ()=>switchTab("review");
-document.getElementById("btnNextQuote").onclick = ()=>{
-  state.quoteIndex = (state.quoteIndex+1) % DATA.quotes.length;
+document.getElementById("btnOpenWrong").onclick = function(){ switchTab("review"); };
+document.getElementById("btnNextQuote").onclick = function(){
+  const course = currentCourse();
+  const ds = dayState();
+  ds.quoteIndex = (ds.quoteIndex+1) % Math.max(1, course.quotes.length);
   saveState();
   refreshHeader();
 };
-document.getElementById("btnFontNormal").onclick = ()=>{
+document.getElementById("btnFontNormal").onclick = function(){
   state.settings.fontScale = 1;
   document.documentElement.style.setProperty("--font","16px");
   saveState(); toast("已切换标准字号");
 };
-document.getElementById("btnFontLarge").onclick = ()=>{
+document.getElementById("btnFontLarge").onclick = function(){
   state.settings.fontScale = 1.15;
   document.documentElement.style.setProperty("--font","18px");
   saveState(); toast("已切换大字号");
 };
-document.getElementById("btnReset").onclick = ()=>{
-  if(confirm("确定重置全部学习进度？此操作不可恢复。")){
-    state = defaultState();
+document.getElementById("btnResetDay").onclick = function(){
+  if(confirm("确定重置当前课程日的学习进度？")){
+    state.days[state.currentCourseId] = defaultDayState();
     saveState();
-    refreshHeader();
-    toast("进度已重置");
+    refreshAll();
+    toast("当前日进度已重置");
     switchTab("home");
   }
 };
-document.getElementById("btnCopyShare").onclick = async ()=>{
-  const text = `【AI 主课知识宝典】基于 7/15 课堂整理的手机复习工具：6 大模块教案 + 选择/判断练习，答错可回看课堂时间码与原话。打开 learn/index.html 即可离线使用。`;
+document.getElementById("btnResetAll").onclick = function(){
+  if(confirm("确定重置全部课程进度？此操作不可恢复。")){
+    state = defaultState();
+    saveState();
+    refreshAll();
+    toast("全部进度已重置");
+    switchTab("home");
+  }
+};
+document.getElementById("btnCopyShare").onclick = async function(){
+  const text = "【AI 主课知识宝典】每日课堂复习工具（教案+选择/判断，答错回看课堂片段）：\n" + SHARE_URL;
   try{
     await navigator.clipboard.writeText(text);
     toast("分享文案已复制");
@@ -926,11 +908,11 @@ document.getElementById("btnCopyShare").onclick = async ()=>{
   }
 };
 
-/* init */
-refreshHeader();
-renderLearnList();
-// validate data quickly in console
-console.info("[AI-KB]", DATA.questions.length, "questions;", DATA.cards.length, "cards;", DATA.modules.length, "modules");
+// init
+refreshAll();
+console.info("[AI-KB v2]", DATA.courses.length, "courses;",
+  DATA.courses.reduce(function(s,c){ return s+c.questions.length; },0), "questions");
+
 </script>
 </body>
 </html>
